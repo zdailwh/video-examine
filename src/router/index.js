@@ -97,6 +97,26 @@ export const constantRoutes = [
         meta: { title: '用户管理', icon: 'table', affix: true }
       }
     ]
+  },
+  {
+    path: '/task',
+    component: Layout,
+    redirect: '/task/index',
+    meta: { title: '任务管理', icon: 'table' },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/task/index'),
+        name: 'Task',
+        meta: { title: '任务列表', icon: 'table', affix: true }
+      },
+      {
+        path: 'add',
+        component: () => import('@/views/task/add'),
+        name: 'TaskAdd',
+        meta: { title: '新建任务', icon: 'table', affix: false }
+      }
+    ]
   }
 ]
 
