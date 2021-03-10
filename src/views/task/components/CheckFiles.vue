@@ -213,7 +213,12 @@ export default {
               var fileObj = fso.GetFile(folders[j])
               option.text = fileObj.Name // 文件名称
               option.path = fileObj.Path
-              option.size = change(fileObj.Size)
+              option.size = fileObj.Size
+
+              option.name = fileObj.Name
+              option.lastModifiedDate = fileObj.DateLastModified
+              option.type = 'image/jpeg'
+
               option.fileobj = fileObj
               // option.path = fileObj.Path // 文件路径
               // option.size = change(fileObj.Size) // 文件大小（单位：字节）

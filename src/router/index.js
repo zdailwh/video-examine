@@ -115,6 +115,12 @@ export const constantRoutes = [
         component: () => import('@/views/task/add'),
         name: 'TaskAdd',
         meta: { title: '新建任务', icon: 'table', affix: false }
+      },
+      {
+        path: 'test',
+        component: () => import('@/views/task/test'),
+        name: 'TaskTest',
+        meta: { title: '上传测试', icon: 'table', affix: false }
       }
     ]
   }
