@@ -44,11 +44,7 @@
           <span>{{ row.status }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center">
-        <template slot-scope="{row}">
-          <span></span>
-        </template>
-      </el-table-column>
+      <el-table-column label="操作" align="center" />
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />

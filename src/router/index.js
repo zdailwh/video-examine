@@ -94,7 +94,7 @@ export const constantRoutes = [
         path: 'index',
         component: () => import('@/views/admin/index'),
         name: 'Finger',
-        meta: { title: '用户管理', icon: 'table', affix: true }
+        meta: { title: '用户管理', icon: 'peoples', affix: true }
       }
     ]
   },
@@ -102,25 +102,19 @@ export const constantRoutes = [
     path: '/task',
     component: Layout,
     redirect: '/task/index',
-    meta: { title: '任务管理', icon: 'table' },
+    meta: { title: '任务管理', icon: 'el-icon-s-flag' },
     children: [
       {
         path: 'index',
         component: () => import('@/views/task/index'),
         name: 'Task',
-        meta: { title: '任务列表', icon: 'table', affix: true }
+        meta: { title: '任务列表', icon: 'el-icon-s-order', affix: true }
       },
       {
         path: 'add',
         component: () => import('@/views/task/add'),
         name: 'TaskAdd',
-        meta: { title: '新建任务', icon: 'table', affix: false }
-      },
-      {
-        path: 'test',
-        component: () => import('@/views/task/test'),
-        name: 'TaskTest',
-        meta: { title: '上传测试', icon: 'table', affix: false }
+        meta: { title: '新建任务', icon: 'el-icon-document-add', affix: false }
       }
     ]
   }

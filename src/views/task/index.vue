@@ -62,8 +62,10 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
-        <template slot-scope="{row}">
-          <span></span>
+        <template>
+          <el-button type="text" size="medium">置顶</el-button>
+          <el-button type="text" size="medium">查看</el-button>
+          <el-button type="text" size="medium">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
