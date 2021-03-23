@@ -21,6 +21,9 @@
       <el-form-item>
         <el-button @click="resetForm('filterForm')">重置</el-button>
       </el-form-item>
+      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="dialogVisibleAdd = true">
+        创建用户
+      </el-button>
     </el-form>
 
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
@@ -41,23 +44,47 @@
       </el-table-column>
       <el-table-column label="状态" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.status }}</span>
+          <el-tag v-if="row.status === '激活'" type="success">{{ row.status }}</el-tag>
+          <el-tag v-else-if="row.status === '冻结'" type="danger">{{ row.status }}</el-tag>
+          <el-tag v-else type="info">{{ row.status }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" />
+      <el-table-column label="操作" align="center">
+        <template slot-scope="{row, $index}">
+          <el-button v-if="row.status !== '激活'" type="text" size="medium" @click="actived(row.id, $index)">激活</el-button>
+          <el-button v-if="row.status !== '冻结'" type="text" size="medium" @click="inactived(row.id, $index)">冻结</el-button>
+          <el-button type="text" size="medium" @click="editHandle(row, $index)">编辑</el-button>
+          <el-popover
+            placement="top"
+            width="170"
+            trigger="hover"
+          >
+            <p>确定要删除此用户吗？</p>
+            <div style="text-align: right; margin: 0">
+              <el-button type="danger" size="mini" @click="delUser(row.id, $index)">确定</el-button>
+            </div>
+            <el-button slot="reference" type="text" size="medium" style="margin-left: 10px;">删除</el-button>
+          </el-popover>
+        </template>
+      </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+
+    <Add :dialog-visible-add="dialogVisibleAdd" @changeAddVisible="changeAddVisible" />
+    <Edit :edit-item="editItem" :dialog-visible-edit="dialogVisibleEdit" @changeEditVisible="changeEditVisible" />
   </div>
 </template>
 
 <script>
-import { fetchList } from '@/api/admin'
+import { fetchList, actived, inactived, deleteUser } from '@/api/admin'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import Add from './add.vue'
+import Edit from './edit.vue'
 
 export default {
-  components: { Pagination },
+  components: { Pagination, Add, Edit },
   directives: { waves },
   data() {
     return {
@@ -71,7 +98,11 @@ export default {
       filterForm: {
         date: '',
         username: ''
-      }
+      },
+      editItem: {},
+      editIndex: '',
+      dialogVisibleAdd: false,
+      dialogVisibleEdit: false
     }
   },
   created() {
@@ -88,6 +119,11 @@ export default {
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
+      }).catch(error => {
+        this.$message({
+          message: error.message || '操作失败！',
+          type: 'error'
+        })
       })
     },
     handleFilter() {
@@ -96,6 +132,50 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
+    },
+    actived(id, idx) {
+      actived({ id: id }).then(response => {
+        this.list[idx].status = '激活'
+      }).catch(error => {
+        this.$message({
+          message: error.message || '操作失败！',
+          type: 'error'
+        })
+      })
+    },
+    inactived(id, idx) {
+      inactived({ id: id }).then(response => {
+        this.list[idx].status = '冻结'
+      }).catch(error => {
+        this.$message({
+          message: error.message || '操作失败！',
+          type: 'error'
+        })
+      })
+    },
+    delUser(id, idx) {
+      deleteUser({ id: id }).then(response => {
+        this.$message({
+          message: '删除成功！',
+          type: 'success'
+        })
+      }).catch(error => {
+        this.$message({
+          message: error.message || '操作失败！',
+          type: 'error'
+        })
+      })
+    },
+    changeAddVisible(params) {
+      this.dialogVisibleAdd = params
+    },
+    editHandle(item, idx) {
+      this.editItem = item
+      this.editIndex = idx
+      this.dialogVisibleEdit = true
+    },
+    changeEditVisible(params) {
+      this.dialogVisibleEdit = params
     }
   }
 }

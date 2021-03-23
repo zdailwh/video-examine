@@ -16,9 +16,17 @@ for (let i = 0; i < count; i++) {
   }))
 }
 
+const user = Mock.mock({
+  id: '@increment',
+  create_time: '@datetime',
+  username: '@first',
+  mobile: '18601234567',
+  'status|1': ['激活', '冻结']
+})
+
 module.exports = [
   {
-    url: '/vue-element-admin/admin/list',
+    url: '/admin/v1/users',
     type: 'get',
     response: config => {
       const { importance, type, title, page = 1, limit = 20, sort } = config.query
@@ -43,6 +51,41 @@ module.exports = [
           items: pageList
         }
       }
+    }
+  },
+  {
+    url: '/admin/v1/users/[0-9]',
+    type: 'put',
+    response: config => {
+      return user
+    }
+  },
+  {
+    url: '/admin/v1/users',
+    type: 'post',
+    response: config => {
+      return user
+    }
+  },
+  {
+    url: '/admin/v1/users/[0-9]',
+    type: 'delete',
+    response: config => {
+      return user
+    }
+  },
+  {
+    url: '/admin/v1/users/[0-9]/actived',
+    type: 'put',
+    response: config => {
+      return user
+    }
+  },
+  {
+    url: '/admin/v1/users/[0-9]/inactived',
+    type: 'put',
+    response: config => {
+      return user
     }
   }
 ]
