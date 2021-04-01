@@ -1,25 +1,31 @@
 <template>
   <div class="app-container">
     <el-form ref="filterForm" :model="filterForm" :inline="true">
-      <el-form-item prop="nickname">
+      <el-form-item prop="create_time_range">
         <el-date-picker
-          v-model="filterForm.date"
+          v-model="filterForm.create_time_range"
           type="datetimerange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="['12:00:00']"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          start-placeholder="创建开始日期"
+          end-placeholder="创建结束日期"
+        />
+      </el-form-item>
+      <el-form-item prop="update_time_range">
+        <el-date-picker
+          v-model="filterForm.update_time_range"
+          type="datetimerange"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          start-placeholder="更新开始日期"
+          end-placeholder="更新结束日期"
         />
       </el-form-item>
       <el-form-item prop="status">
         <el-select v-model="filterForm.status" placeholder="任务状态">
-          <el-option label="待上传" value="待上传" />
-          <el-option label="上传中" value="上传中" />
-          <el-option label="处理中" value="处理中" />
-          <el-option label="完成" value="完成" />
+          <el-option v-for="item in statusArr" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="getList">
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
           搜索
         </el-button>
       </el-form-item>
@@ -29,66 +35,129 @@
     </el-form>
 
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
+      <el-table-column type="expand">
+        <template slot-scope="{row}">
+          <el-form label-position="left" inline class="table-expand" label-width="100px">
+            <el-form-item v-if="row.realpath" label="保存实际路径">
+              <span>{{ row.realpath }}</span>
+            </el-form-item>
+            <el-form-item v-if="row.path" label="保存相对路径">
+              <span>{{ row.path }}</span>
+            </el-form-item>
+            <el-form-item v-if="row.md5" label="md5值">
+              <span>{{ row.md5 }}</span>
+            </el-form-item>
+            <el-form-item v-if="row.log" label="日志">
+              <span>{{ row.log }}</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
       <el-table-column label="ID" align="center">
         <template slot-scope="{row}">
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="磁盘序列号" align="center">
+      <el-table-column label="原始硬盘序列号" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.serialNumber }}</span>
+          <span>{{ row.disksn }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="文件名" align="center">
+      <el-table-column label="原始目录" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.filename }}</span>
+          <span>{{ row.localpath }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="文件大小" align="center">
+      <el-table-column label="文件" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.size }}</span>
+          <div class="myTabelCell">
+            <p>名称：{{ row.name }}</p>
+            <p>扩展名：{{ row.ext }}</p>
+            <p>MIME类型：{{ row.mime }}</p>
+            <p>大小：{{ row.sizestr }}</p>
+          </div>
         </template>
       </el-table-column>
-      <el-table-column label="文件路径" align="center" width="100px">
+      <el-table-column label="优先级" align="center" width="50px">
         <template slot-scope="{row}">
-          <span>{{ row.path }}</span>
+          <span>{{ row.prority }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center">
+      <el-table-column label="重试次数" align="center" width="50px">
         <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter">
-            {{ row.status }}
+          <span>{{ row.retry }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="时间" align="center">
+        <template slot-scope="{row}">
+          <div class="myTabelCell">
+            <p>最近审核时间：<br>{{ row.reviewtime }}</p>
+            <p>完成时间：<br>{{ row.finishtime }}</p>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="审核结果状态" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.filestatustr }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="任务状态" align="center">
+        <template slot-scope="{row}">
+          <el-tag :type="row.statusstr | statusFilter">
+            {{ row.statusstr }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
-        <template>
-          <el-button type="text" size="medium">置顶</el-button>
-          <el-button type="text" size="medium">查看</el-button>
-          <el-button type="text" size="medium">删除</el-button>
+        <template slot-scope="{row, $index}">
+          <el-button type="text" size="medium" @click="editHandle(row, $index)">编辑</el-button>
+          <el-popover
+            placement="top"
+            width="170"
+            trigger="hover"
+          >
+            <p>确定要删除此任务吗？</p>
+            <div style="text-align: right; margin: 0">
+              <el-button type="danger" size="mini" @click="delTask(row.id, $index)">确定</el-button>
+            </div>
+            <el-button slot="reference" type="text" size="medium" style="margin-left: 10px;">删除</el-button>
+          </el-popover>
+          <el-button v-if="row.result !== ''" type="text" size="medium"><router-link :to="{name: 'TaskDetail', params: {result: row.result}}">查看结果</router-link></el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+
+    <Edit :edit-item="editItem" :dialog-visible-edit="dialogVisibleEdit" @changeEditVisible="changeEditVisible" @refresh="getList" />
   </div>
 </template>
 
 <script>
-import { fetchList } from '@/api/task'
+import { fetchList, deleteTask } from '@/api/task'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import Edit from './edit.vue'
+
+// const STATUS_INIT = 0 // '已创建'
+// const STATUS_NOFILE = 1 // '文件待上传'
+// const STATUS_UPLOADED = 2 // '文件上传成功'
+// const STATUS_DOING = 3 // '处理中'
+// const STATUS_SUCCESS = 4 // '处理成功'
+// const STATUS_FAIL = 5 // '处理失败'
 
 export default {
-  components: { Pagination },
+  components: { Pagination, Edit },
   directives: { waves },
   filters: {
     statusFilter(status) {
       const statusMap = {
-        '待上传': 'warning',
-        '上传中': '',
-        '处理中': '',
-        '完成': 'success'
+        '已创建': 'info',
+        '文件待上传': 'info',
+        '文件上传成功': '',
+        '处理中': 'warning',
+        '处理成功': 'success',
+        '处理失败': 'danger'
       }
       return statusMap[status]
     }
@@ -103,9 +172,14 @@ export default {
         limit: 20
       },
       filterForm: {
-        date: '',
+        create_time_range: [],
+        update_time_range: [],
         status: ''
-      }
+      },
+      editItem: {},
+      editIndex: '',
+      dialogVisibleEdit: false,
+      statusArr: [{ label: '已创建', value: 0 }, { label: '文件待上传', value: 1 }, { label: '文件上传成功', value: 2 }, { label: '处理中', value: 3 }, { label: '处理成功', value: 4 }, { label: '处理失败', value: 5 }]
     }
   },
   created() {
@@ -114,23 +188,78 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+      fetchList(this.listQuery).then(data => {
+        this.list = data.items
+        this.total = data.total
 
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
+      }).catch(error => {
+        this.listLoading = false
+        this.$message({
+          message: error.message || '操作失败！',
+          type: 'error'
+        })
       })
     },
     handleFilter() {
-      this.listQuery.page = 1
+      this.listQuery = {
+        page: 1,
+        limit: 20
+      }
+      if (this.filterForm.create_time_range.length) {
+        this.listQuery.create_time_range = this.filterForm.create_time_range
+      }
+      if (this.filterForm.update_time_range.length) {
+        this.listQuery.update_time_range = this.filterForm.update_time_range
+      }
+      if (this.filterForm.status !== '') {
+        this.listQuery.status = this.filterForm.status
+      }
       this.getList()
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
+    },
+    delTask(id, idx) {
+      deleteTask({ id: id }).then(response => {
+        this.$message({
+          message: '删除成功！',
+          type: 'success'
+        })
+        this.getList()
+      }).catch(error => {
+        this.$message({
+          message: error.message || '操作失败！',
+          type: 'error'
+        })
+      })
+    },
+    editHandle(item, idx) {
+      this.editItem = item
+      this.editIndex = idx
+      this.dialogVisibleEdit = true
+    },
+    changeEditVisible(params) {
+      this.dialogVisibleEdit = params
     }
   }
 }
 </script>
+<style scoped>
+.myTabelCell p {
+  text-align: left;
+  margin: 0 auto;
+  margin-top: 5px;
+}
+.table-expand {
+  font-size: 0;
+}
+.table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 100%;
+}
+</style>

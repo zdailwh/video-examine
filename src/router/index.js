@@ -72,19 +72,7 @@ export const constantRoutes = [
   },
   {
     path: '/',
-    redirect: '/preview/index'
-  },
-  {
-    path: '/preview',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/preview/index'),
-        name: 'Preview',
-        meta: { title: '总览', icon: 'dashboard', affix: true }
-      }
-    ]
+    redirect: '/admin/index'
   },
   {
     path: '/admin',
@@ -105,6 +93,12 @@ export const constantRoutes = [
     meta: { title: '任务管理', icon: 'el-icon-s-flag' },
     children: [
       {
+        path: 'group',
+        component: () => import('@/views/task/group'),
+        name: 'TaskGroup',
+        meta: { title: '任务组', icon: 'el-icon-s-order', affix: true }
+      },
+      {
         path: 'index',
         component: () => import('@/views/task/index'),
         name: 'Task',
@@ -112,12 +106,31 @@ export const constantRoutes = [
       },
       {
         path: 'add',
-        component: () => import('@/views/task/add'),
+        component: () => import('@/views/task/addChrome'),
         name: 'TaskAdd',
-        meta: { title: '新建任务', icon: 'el-icon-document-add', affix: false }
+        meta: { title: '新建任务', icon: 'el-icon-document-add' }
+      },
+      {
+        path: 'view',
+        component: () => import('@/views/task/detail'),
+        name: 'TaskDetail',
+        hidden: true,
+        meta: { title: '查看任务' }
       }
     ]
   }
+  // {
+  //   path: '/preview',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       component: () => import('@/views/preview/index'),
+  //       name: 'Preview',
+  //       meta: { title: '总览', icon: 'dashboard', affix: true }
+  //     }
+  //   ]
+  // },
 ]
 
 /**

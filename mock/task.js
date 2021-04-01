@@ -10,20 +10,83 @@ for (let i = 0; i < count; i++) {
   List.push(Mock.mock({
     id: '@increment',
     create_time: '@datetime',
+    update_time:'@datetime',
+    'status|1': [0, 1, 2, 3, 4, 5],
+    'statusstr|1': ['已创建', '文件待上传', '文件上传成功', '处理中', '处理成功', '处理失败'],
+    disksn: '12345678',
+    localpath: 'C:\\lyl\\test.ts',
+    name: '12345678123456781234567812345678',
+    ext: 'ts',
+    realpath: '/data/web/www/private/uploads/12345678123456781234567812345678/12345678123456781234567812345678.ts',
+    mime: '',
+    size: 0,
+    sizestr: '0B',
+    md5: '12345678123456781234567812345678',
+    prority: 0,
+    retry: 0,
+    reviewtime: '@datetime',
+    finishtime: '@datetime',
+    log: '',
+    result: ''
+  }))
+}
+
+const task = Mock.mock({
+  id: '@increment',
+  create_time: '@datetime',
+  update_time:'@datetime',
+  'status|1': [0, 1, 2, 3, 4, 5],
+  'statusstr|1': ['已创建', '文件待上传', '文件上传成功', '处理中', '处理成功', '处理失败'],
+  disksn: '12345678',
+  localpath: 'C:\\lyl\\test.ts',
+  name: '12345678123456781234567812345678',
+  ext: 'ts',
+  realpath: '/data/web/www/private/uploads/12345678123456781234567812345678/12345678123456781234567812345678.ts',
+  mime: '',
+  size: 0,
+  sizestr: '0B',
+  md5: '12345678123456781234567812345678',
+  prority: 0,
+  retry: 0,
+  reviewtime: '@datetime',
+  finishtime: '@datetime',
+  log: '',
+  result: ''
+})
+
+const infoList = []
+const infoCount = 60
+
+for (let i = 0; i < infoCount; i++) {
+  infoList.push(Mock.mock({
+    id: '@increment',
+    create_time: '@datetime',
     serialNumber: '@increment',
-    filename: '1.ts',
-    size: '231113',
-    path: 'c:\\1.ts',
-    'status|1': ['待上传', '上传中', '处理中', '完成'],
+    p1: '00:01:13',
+    p2: '静音',
+    p3: '2s'
   }))
 }
 
 module.exports = [
   {
-    url: '/vue-element-admin/task/list',
+    url: '/admin/review/v1/filereviews/[0-9]',
     type: 'get',
     response: config => {
-      const { importance, type, title, page = 1, limit = 20, sort } = config.query
+      const { page = 0, per_page = 20 } = config.query
+      let mockInfoList = infoList
+      const pageList = mockInfoList.filter((item, index) => index < per_page * (page + 1) && index >= per_page * page)
+      return {
+        total: mockInfoList.length,
+        items: pageList
+      }
+    }
+  },
+  {
+    url: '/admin/review/v1/filereviews',
+    type: 'get',
+    response: config => {
+      const { importance, type, title, page = 0, per_page = 20, sort } = config.query
 
       let mockList = List.filter(item => {
         if (importance && item.importance !== +importance) return false
@@ -36,15 +99,40 @@ module.exports = [
         mockList = mockList.reverse()
       }
 
-      const pageList = mockList.filter((item, index) => index < limit * page && index >= limit * (page - 1))
+      const pageList = mockList.filter((item, index) => index < per_page * (page + 1) && index >= per_page * page)
 
       return {
-        code: 20000,
-        data: {
-          total: mockList.length,
-          items: pageList
-        }
+        total: mockList.length,
+        items: pageList
       }
+    }
+  },
+  {
+    url: '/admin/review/v1/filereviews',
+    type: 'post',
+    response: config => {
+      return task
+    }
+  },
+  {
+    url: '/admin/review/v1/filereviews/[0-9]/merge',
+    type: 'put',
+    response: config => {
+      return task
+    }
+  },
+  {
+    url: '/admin/review/v1/filereviews/[0-9]',
+    type: 'put',
+    response: config => {
+      return task
+    }
+  },
+  {
+    url: '/admin/review/v1/filereviews/[0-9]',
+    type: 'delete',
+    response: config => {
+      return task
     }
   }
 ]

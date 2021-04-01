@@ -12,7 +12,10 @@ for (let i = 0; i < count; i++) {
     create_time: '@datetime',
     username: '@first',
     mobile: '18601234567',
-    'status|1': ['激活', '冻结']
+    password: '',
+    'isadmin|1': [0, 1, 2],
+    activity: '@increment',
+    'status|1': [0, 1, 2]
   }))
 }
 
@@ -21,7 +24,10 @@ const user = Mock.mock({
   create_time: '@datetime',
   username: '@first',
   mobile: '18601234567',
-  'status|1': ['激活', '冻结']
+  password: '',
+  'isadmin|1': [0, 1, 2],
+  activity: '@increment',
+  'status|1': [0, 1, 2]
 })
 
 module.exports = [
@@ -29,7 +35,7 @@ module.exports = [
     url: '/admin/v1/users',
     type: 'get',
     response: config => {
-      const { importance, type, title, page = 1, limit = 20, sort } = config.query
+      const { importance, type, title, page = 0, per_page = 20, sort } = config.query
 
       let mockList = List.filter(item => {
         if (importance && item.importance !== +importance) return false
@@ -42,14 +48,11 @@ module.exports = [
         mockList = mockList.reverse()
       }
 
-      const pageList = mockList.filter((item, index) => index < limit * page && index >= limit * (page - 1))
+      const pageList = mockList.filter((item, index) => index < per_page * (page + 1) && index >= per_page * page)
 
       return {
-        code: 20000,
-        data: {
-          total: mockList.length,
-          items: pageList
-        }
+        total: mockList.length,
+        items: pageList
       }
     }
   },

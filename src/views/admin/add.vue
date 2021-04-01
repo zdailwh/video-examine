@@ -16,6 +16,13 @@
         <el-form-item label="手机号" prop="mobile">
           <el-input v-model="formadd.mobile" />
         </el-form-item>
+        <el-form-item label="标识" prop="isadmin">
+          <el-select v-model="formadd.isadmin" placeholder="请选择管理员标识">
+            <el-option label="操作员" value="0" />
+            <el-option label="管理员" value="1" />
+            <el-option label="超级管理员" value="2" />
+          </el-select>
+        </el-form-item>
       </el-form>
     </div>
     <span slot="footer" class="dialog-footer">
@@ -38,7 +45,8 @@ export default {
       formadd: {
         username: '',
         password: '',
-        mobile: ''
+        mobile: '',
+        isadmin: ''
       },
       ruleValidate: {
         username: [
@@ -52,6 +60,9 @@ export default {
         mobile: [
           { required: true, message: '手机号码不能为空', trigger: 'blur' },
           { type: 'string', message: '手机号格式不正确', length: 11, pattern: /^1[3|5|8|7]([0-9]{9})$/, trigger: 'blur' }
+        ],
+        isadmin: [
+          { required: true, message: '请选择管理员标识', trigger: 'change' }
         ]
       }
     }
@@ -76,7 +87,14 @@ export default {
           message: '创建成功！',
           type: 'success'
         })
+        this.formadd = {
+          username: '',
+          password: '',
+          mobile: '',
+          isadmin: ''
+        }
         this.$emit('changeAddVisible', false)
+        this.$emit('refresh')
       }).catch(error => {
         this.$message({
           message: error.message || '操作失败！',
@@ -86,6 +104,7 @@ export default {
     },
     reset() {
       this.$refs.form.resetFields()
+      this.$emit('changeAddVisible', false)
     },
     handleClose(done) {
       this.$emit('changeAddVisible', false)
