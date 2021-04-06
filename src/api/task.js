@@ -5,6 +5,12 @@ export function fetchList(query) {
     page: query.page - 1,
     per_page: query.limit
   }
+  if (query.disksn !== '') {
+    params.disksn = query.disksn
+  }
+  if (query.createdate !== '') {
+    params.createdate = query.createdate
+  }
   if (query.create_time_range && query.create_time_range.length) {
     params.create_time_range = query.create_time_range
   }

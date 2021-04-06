@@ -7,18 +7,20 @@ for (let i = 0; i < count; i++) {
   List.push(Mock.mock({
     id: '@increment',
     create_time: '@datetime',
-    username: '@first',
-    mobile: '18601234567',
-    password: '',
-    'isadmin|1': [0, 1, 2],
-    activity: '@increment',
-    'status|1': [0, 1, 2]
+    disksn: '1239876',
+    createdate: '@date',
+    totalcount: 12,
+    finishcount: 5,
+    errorcount: 7,
+    faultcount: 14,
+    'status|1': [0, 1],
+    'statusstr|1': ['有效', '无效']
   }))
 }
 
 module.exports = [
   {
-    url: '/admin/v1/groups',
+    url: '/admin/review/v1/filegroups',
     type: 'get',
     response: config => {
       const { importance, type, title, page = 0, per_page = 20, sort } = config.query

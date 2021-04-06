@@ -1,6 +1,17 @@
 <template>
   <div class="app-container">
     <el-form ref="filterForm" :model="filterForm" :inline="true">
+      <el-form-item prop="disksn">
+        <el-input v-model="filterForm.disksn" placeholder="硬盘序列号" style="width:120px" />
+      </el-form-item>
+      <el-form-item prop="createdate">
+        <el-date-picker
+          v-model="filterForm.createdate"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="创建日期"
+        />
+      </el-form-item>
       <el-form-item prop="create_time_range">
         <el-date-picker
           v-model="filterForm.create_time_range"
@@ -50,15 +61,23 @@
             <el-form-item v-if="row.log" label="日志">
               <span>{{ row.log }}</span>
             </el-form-item>
+            <el-form-item v-if="row.filegroup && row.filegroup.id" label="任务组">
+              <span>{{ JSON.stringify(row.filegroup) }}</span>
+            </el-form-item>
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column label="ID" align="center">
+      <el-table-column label="ID" align="center" width="80px">
         <template slot-scope="{row}">
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="原始硬盘序列号" align="center">
+      <el-table-column label="任务组ID" align="center" width="80px">
+        <template slot-scope="{row}">
+          <span v-if="row.filegroup && row.filegroup.id">{{ row.filegroup.id }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="原始硬盘序列号" align="center" width="100px">
         <template slot-scope="{row}">
           <span>{{ row.disksn }}</span>
         </template>
@@ -71,11 +90,16 @@
       <el-table-column label="文件" align="center">
         <template slot-scope="{row}">
           <div class="myTabelCell">
-            <p>名称：{{ row.name }}</p>
+            <p>原始名称：{{ row.name }}</p>
             <p>扩展名：{{ row.ext }}</p>
             <p>MIME类型：{{ row.mime }}</p>
             <p>大小：{{ row.sizestr }}</p>
           </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="文件名称" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.filename }}</span>
         </template>
       </el-table-column>
       <el-table-column label="优先级" align="center" width="50px">
@@ -91,12 +115,13 @@
       <el-table-column label="时间" align="center">
         <template slot-scope="{row}">
           <div class="myTabelCell">
+            <p>创建日期：<br>{{ row.createdate }}</p>
             <p>最近审核时间：<br>{{ row.reviewtime }}</p>
             <p>完成时间：<br>{{ row.finishtime }}</p>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="审核结果状态" align="center">
+      <el-table-column label="故障点" align="center">
         <template slot-scope="{row}">
           <span>{{ row.filestatustr }}</span>
         </template>
@@ -172,6 +197,8 @@ export default {
         limit: 20
       },
       filterForm: {
+        disksn: '',
+        createdate: '',
         create_time_range: [],
         update_time_range: [],
         status: ''
@@ -183,7 +210,13 @@ export default {
     }
   },
   created() {
-    this.getList()
+    if (this.$route.params.disksn) {
+      this.filterForm.disksn = this.$route.params.disksn
+    }
+    if (this.$route.params.createdate) {
+      this.filterForm.createdate = this.$route.params.createdate
+    }
+    this.handleFilter()
   },
   methods: {
     getList() {
@@ -209,6 +242,12 @@ export default {
         page: 1,
         limit: 20
       }
+      if (this.filterForm.disksn !== '') {
+        this.listQuery.disksn = this.filterForm.disksn
+      }
+      if (this.filterForm.createdate !== '') {
+        this.listQuery.createdate = this.filterForm.createdate
+      }
       if (this.filterForm.create_time_range.length) {
         this.listQuery.create_time_range = this.filterForm.create_time_range
       }
@@ -222,6 +261,13 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
+      this.filterForm = {
+        disksn: '',
+        createdate: '',
+        create_time_range: [],
+        update_time_range: [],
+        status: ''
+      }
     },
     delTask(id, idx) {
       deleteTask({ id: id }).then(response => {

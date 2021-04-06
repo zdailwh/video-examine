@@ -74,11 +74,17 @@ service.interceptors.response.use(
   },
   error => {
     console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
+    if (error.response.status === 401) {
+      store.dispatch('user/resetToken').then(() => {
+        location.reload()
+      })
+    } else {
+      Message({
+        message: error.response.data,
+        type: 'error',
+        duration: 5 * 1000
+      })
+    }
     return Promise.reject(error)
   }
 )
