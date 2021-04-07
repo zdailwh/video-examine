@@ -231,12 +231,7 @@ export default {
         return
       }
 
-      var uploadWorker = new Worker('/filereview/create-task.js')
-      uploadWorker.postMessage({ filelist: this.checkedList, disksn: this.addForm.disksn })
-      uploadWorker.onmessage = e => {
-        console.log(e)
-      }
-      // await this.createTasks(this.checkedList)
+      await this.createTasks(this.checkedList)
     },
     async createTasks(filelist) {
       const requestList = filelist.map(async(listItem, idx, arr) => {
