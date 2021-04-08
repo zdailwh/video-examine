@@ -9,6 +9,7 @@
           <el-button class="filter-item" icon="el-icon-folder-opened" @click="folderCheck">
             选择文件所属目录
           </el-button>
+          <span style="color: #909399;margin-left: 10px;">目前支持的文件格式有：{{ enableFile.join('、') }}</span>
         </el-form-item>
         <el-form-item>
           <el-button class="filter-item" type="primary" icon="el-icon-upload" @click="createHandle">
@@ -108,7 +109,8 @@ export default {
       // 为了避免这种情况，需要定义一个假的进度条
       fakeUploadPercentage: 0,
       extsArr: [],
-      checkedExts: []
+      checkedExts: [],
+      enableFile: ['ts', 'mp4', 'mxf', 'avi']
     }
   },
   computed: {
@@ -186,17 +188,19 @@ export default {
           var file = await entry.getFile()
           file.path = this.rootDirectory + '/' + (await that.rootHandle.resolve(entry)).join('/')
           var ext = file.name.substring(file.name.lastIndexOf('.') + 1)
-          that.list.push({ file: file, ext: ext, percentage: 0 })
+          if (this.enableFile.includes(ext)) {
+            that.list.push({ file: file, ext: ext, percentage: 0 })
+          }
         }
       }
     },
     getExts() {
-      const exts = []
-      this.list.forEach((fileitem, idx, arr) => {
-        if (exts.indexOf(fileitem.ext) === -1) {
-          exts.push(fileitem.ext)
-        }
-      })
+      const exts = this.enableFile
+      // this.list.forEach((fileitem, idx, arr) => {
+      //   if (exts.indexOf(fileitem.ext) === -1) {
+      //     exts.push(fileitem.ext)
+      //   }
+      // })
       this.extsArr = exts
       this.checkedExts = exts
     },
@@ -268,6 +272,7 @@ export default {
       })
     },
     async uploadFiles(filelist, startIdx) {
+      this.currFileIdx = startIdx
       const listItem = filelist[startIdx]
       const fileChunkList = listItem.fileChunkList
       this.container.file = listItem.file
@@ -279,29 +284,39 @@ export default {
       // const fileChunkList = this.createFileChunk(this.container.file)
       // this.container.hash = await this.calculateHash(fileChunkList)
 
-      // const { shouldUpload, uploadedList } = await this.verifyUpload(
-      //   this.container.file.name,
-      //   this.container.hash
-      // )
-      // if (!shouldUpload) {
-      //   this.$message.success('秒传：上传成功')
-      //   this.status = Status.wait
-      //   return
-      // }
-      var uploadedList = []
-      this.chunkData = fileChunkList.map(({ file }, index) => ({
-        taskid: listItem.taskid,
-        fileHash: listItem.hash,
-        index,
-        hash: listItem.hash + '-' + index,
-        chunk: file,
-        size: file.size,
-        percentage: uploadedList.includes(index) ? 100 : 0
-      }))
-      this.currFileIdx = startIdx
+      var verifyRes = await this.verifyUpload(listItem.hash)
+      if (verifyRes === '资源不存在') {
+        // 说明大文件file在服务端不存在，前端按正常流程将所有分片上传
+        this.chunkData = fileChunkList.map(({ file }, index) => ({
+          taskid: listItem.taskid,
+          fileHash: listItem.hash,
+          index,
+          hash: listItem.hash + '-' + index,
+          chunk: file,
+          size: file.size,
+          percentage: 0
+        }))
 
-      // await this.uploadChunks(uploadedList)
-      await this.uploadChunks()
+        await this.uploadChunks()
+      } else if (verifyRes.file) {
+        // 若file有值，说明已完成上传，前端不需要再传输任何分片文件
+        this.checkedList[startIdx].percentage = 100
+      } else if (verifyRes.file === '' && verifyRes.chunks.length) {
+        // 若file为空，分片chunks有值，说明部分分片已接收
+        var uploadedList = verifyRes.chunks
+        this.chunkData = fileChunkList.map(({ file }, index) => ({
+          taskid: listItem.taskid,
+          fileHash: listItem.hash,
+          index,
+          hash: listItem.hash + '-' + index,
+          chunk: file,
+          size: file.size,
+          percentage: uploadedList.includes(listItem.hash + '-' + index) ? 100 : 0
+        }))
+
+        await this.uploadChunks(uploadedList)
+      }
+
       if (startIdx < filelist.length - 1) {
         await this.uploadFiles(filelist, startIdx + 1)
       } else {
@@ -426,17 +441,13 @@ export default {
     },
     // 根据 hash 验证文件是否曾经已经被上传过
     // 没有才进行上传
-    async verifyUpload(filename, fileHash) {
+    async verifyUpload(fileHash) {
       const { data } = await this.myRequest({
-        url: '/file/verify.json',
+        url: '/api/admin/review/v1/filereviews/verify?md5=' + fileHash,
         method: 'get',
         headers: {
           'content-type': 'application/json'
-        },
-        data: JSON.stringify({
-          filename,
-          fileHash
-        })
+        }
       })
       return JSON.parse(data)
     },
