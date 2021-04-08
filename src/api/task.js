@@ -20,6 +20,9 @@ export function fetchList(query) {
   if (query.status !== '') {
     params.status = query.status
   }
+  if (query.filestatus !== '') {
+    params.filestatus = query.filestatus
+  }
   return request({
     url: '/admin/review/v1/filereviews',
     method: 'get',

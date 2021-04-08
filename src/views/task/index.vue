@@ -35,6 +35,11 @@
           <el-option v-for="item in statusArr" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
+      <el-form-item prop="filestatus">
+        <el-select v-model="filterForm.filestatus" placeholder="故障状态">
+          <el-option v-for="item in fileStatusArr" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
           搜索
@@ -45,7 +50,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
+    <el-table v-loading="listLoading" :data="list" :row-class-name="tableRowClassName" border fit highlight-current-row style="width: 100%;">
       <el-table-column type="expand">
         <template slot-scope="{row}">
           <el-form label-position="left" inline class="table-expand" label-width="100px">
@@ -201,12 +206,14 @@ export default {
         createdate: '',
         create_time_range: [],
         update_time_range: [],
-        status: ''
+        status: '',
+        filestatus: ''
       },
       editItem: {},
       editIndex: '',
       dialogVisibleEdit: false,
-      statusArr: [{ label: '已创建', value: 0 }, { label: '文件待上传', value: 1 }, { label: '文件上传成功', value: 2 }, { label: '处理中', value: 3 }, { label: '处理成功', value: 4 }, { label: '处理失败', value: 5 }]
+      statusArr: [{ label: '已创建', value: 0 }, { label: '文件待上传', value: 1 }, { label: '文件上传成功', value: 2 }, { label: '处理中', value: 3 }, { label: '处理成功', value: 4 }, { label: '处理失败', value: 5 }],
+      fileStatusArr: [{ label: '未知', value: 0 }, { label: '正常', value: 1 }, { label: '有故障', value: 2 }]
     }
   },
   created() {
@@ -219,6 +226,12 @@ export default {
     this.handleFilter()
   },
   methods: {
+    tableRowClassName({ row, rowIndex }) {
+      if (parseInt(row.filestatus) === 2) {
+        return 'warning-row'
+      }
+      return ''
+    },
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(data => {
@@ -256,6 +269,9 @@ export default {
       }
       if (this.filterForm.status !== '') {
         this.listQuery.status = this.filterForm.status
+      }
+      if (this.filterForm.filestatus !== '') {
+        this.listQuery.filestatus = this.filterForm.filestatus
       }
       this.getList()
     },

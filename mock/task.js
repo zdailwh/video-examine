@@ -27,7 +27,9 @@ for (let i = 0; i < count; i++) {
     reviewtime: '@datetime',
     finishtime: '@datetime',
     log: '',
-    result: ''
+    result: '',
+    'filestatus|1': [0, 1, 2],
+    'filestatustr|1': ['未知', '正常', '有故障'],
   }))
 }
 
@@ -51,7 +53,9 @@ const task = Mock.mock({
   reviewtime: '@datetime',
   finishtime: '@datetime',
   log: '',
-  result: ''
+  result: '',
+  'filestatus|1': [0, 1, 2],
+  'filestatustr|1': ['未知', '正常', '有故障'],
 })
 
 const infoList = []

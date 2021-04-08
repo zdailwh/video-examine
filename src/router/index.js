@@ -72,7 +72,7 @@ export const constantRoutes = [
   },
   {
     path: '/',
-    redirect: '/admin/index'
+    redirect: '/task/index'
   },
   {
     path: '/admin',

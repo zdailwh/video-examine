@@ -31,7 +31,7 @@
         />
       </el-form-item>
       <el-form-item prop="status">
-        <el-select v-model="filterForm.status" placeholder="任务状态">
+        <el-select v-model="filterForm.status" placeholder="状态">
           <el-option v-for="item in statusArr" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
