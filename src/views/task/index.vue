@@ -54,6 +54,18 @@
       <el-table-column type="expand">
         <template slot-scope="{row}">
           <el-form label-position="left" inline class="table-expand" label-width="100px">
+            <el-form-item v-if="row.localpath" label="原始目录">
+              <span>{{ row.localpath }}</span>
+            </el-form-item>
+            <el-form-item v-if="row.ext" label="扩展名">
+              <span>{{ row.ext }}</span>
+            </el-form-item>
+            <el-form-item v-if="row.mime" label="MIME类型">
+              <span>{{ row.mime }}</span>
+            </el-form-item>
+            <el-form-item v-if="row.filename" label="文件名称">
+              <span>{{ row.filename }}</span>
+            </el-form-item>
             <el-form-item v-if="row.realpath" label="保存实际路径">
               <span>{{ row.realpath }}</span>
             </el-form-item>
@@ -66,6 +78,9 @@
             <el-form-item v-if="row.log" label="日志">
               <span>{{ row.log }}</span>
             </el-form-item>
+            <el-form-item v-if="row.filegroup && row.filegroup.id" label="任务组ID">
+              <span>{{ row.filegroup.id }}</span>
+            </el-form-item>
             <el-form-item v-if="row.filegroup && row.filegroup.id" label="任务组">
               <span>{{ JSON.stringify(row.filegroup) }}</span>
             </el-form-item>
@@ -77,34 +92,19 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="任务组ID" align="center" width="80px">
-        <template slot-scope="{row}">
-          <span v-if="row.filegroup && row.filegroup.id">{{ row.filegroup.id }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="原始硬盘序列号" align="center" width="100px">
         <template slot-scope="{row}">
           <span>{{ row.disksn }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="原始目录" align="center">
+      <el-table-column label="原始名称" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.localpath }}</span>
+          <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="文件" align="center">
+      <el-table-column label="文件大小" align="center">
         <template slot-scope="{row}">
-          <div class="myTabelCell">
-            <p>原始名称：{{ row.name }}</p>
-            <p>扩展名：{{ row.ext }}</p>
-            <p>MIME类型：{{ row.mime }}</p>
-            <p>大小：{{ row.sizestr }}</p>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="文件名称" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.filename }}</span>
+          <span>{{ row.sizestr }}</span>
         </template>
       </el-table-column>
       <el-table-column label="优先级" align="center" width="50px">
@@ -117,13 +117,19 @@
           <span>{{ row.retry }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="时间" align="center">
+      <el-table-column label="创建日期" align="center">
         <template slot-scope="{row}">
-          <div class="myTabelCell">
-            <p>创建日期：<br>{{ row.createdate }}</p>
-            <p>最近审核时间：<br>{{ row.reviewtime }}</p>
-            <p>完成时间：<br>{{ row.finishtime }}</p>
-          </div>
+          <span>{{ row.createdate }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="最近审核" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.reviewtime }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="完成时间" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.finishtime }}</span>
         </template>
       </el-table-column>
       <el-table-column label="故障点" align="center">
@@ -152,7 +158,7 @@
             </div>
             <el-button slot="reference" type="text" size="medium" style="margin-left: 10px;">删除</el-button>
           </el-popover>
-          <el-button v-if="row.result !== ''" type="text" size="medium"><router-link :to="{name: 'TaskDetail', params: {result: row.result}}">查看结果</router-link></el-button>
+          <el-button v-if="row.result !== ''" type="text" size="medium" style="margin-left: 10px;"><router-link :to="{name: 'TaskDetail', params: {result: row.result}}">查看结果</router-link></el-button>
         </template>
       </el-table-column>
     </el-table>
