@@ -50,7 +50,12 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="listLoading" :data="list" :row-class-name="tableRowClassName" border fit highlight-current-row style="width: 100%;">
+    <div style="margin-bottom: 20px;">
+      <el-button class="filter-item" type="danger" icon="el-icon-delete" :disabled="!selectedItems.length" @click="handleDelSelected">批量删除</el-button>
+    </div>
+
+    <el-table v-loading="listLoading" :data="list" :row-class-name="tableRowClassName" border fit highlight-current-row style="width: 100%;" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" />
       <el-table-column type="expand">
         <template slot-scope="{row}">
           <el-form label-position="left" inline class="table-expand" label-width="100px">
@@ -220,7 +225,8 @@ export default {
       editIndex: '',
       dialogVisibleEdit: false,
       statusArr: [{ label: '已创建', value: 0 }, { label: '文件待上传', value: 1 }, { label: '文件上传成功', value: 2 }, { label: '处理中', value: 3 }, { label: '处理成功', value: 4 }, { label: '处理失败', value: 5 }],
-      fileStatusArr: [{ label: '未知', value: 0 }, { label: '正常', value: 1 }, { label: '有故障', value: 2 }]
+      fileStatusArr: [{ label: '未知', value: 0 }, { label: '正常', value: 1 }, { label: '有故障', value: 2 }],
+      selectedItems: []
     }
   },
   created() {
@@ -310,6 +316,45 @@ export default {
     },
     changeEditVisible(params) {
       this.dialogVisibleEdit = params
+    },
+    handleSelectionChange(val) {
+      this.selectedItems = val
+    },
+    handleDelSelected() {
+      this.$confirm(`此操作将删除当前选中的${this.selectedItems.length}条记录, 是否继续?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.doDelSelected()
+      }).catch(() => {
+        console.log('已取消删除')
+      })
+    },
+    doDelSelected() {
+      const requestList = this.selectedItems.map(async(listItem, idx, arr) => {
+        return new Promise((resolve, reject) => {
+          deleteTask({ id: listItem.id }).then(response => {
+            resolve(idx)
+          }).catch(error => {
+            reject(error)
+          })
+        })
+      })
+      Promise.all(requestList).then(res => {
+        if (res.length < this.selectedItems.length) {
+          this.$message({
+            message: '批量删除部分执行成功！',
+            type: 'success'
+          })
+        } else {
+          this.$message({
+            message: '批量删除执行成功！',
+            type: 'success'
+          })
+        }
+        this.getList()
+      })
     }
   }
 }
