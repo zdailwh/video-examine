@@ -134,7 +134,8 @@
       </el-table-column>
       <el-table-column label="故障点" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.filestatustr }}</span>
+          <span v-if="parseInt(row.filestatus) === 2" style="color: #F56C6C;font-weight: bold;">{{ row.filestatustr }}</span>
+          <span v-else>{{ row.filestatustr }}</span>
         </template>
       </el-table-column>
       <el-table-column label="任务状态" align="center">
@@ -244,10 +245,7 @@ export default {
         this.list = data.items
         this.total = data.total
 
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
+        this.listLoading = false
       }).catch(error => {
         this.listLoading = false
         this.$message({
