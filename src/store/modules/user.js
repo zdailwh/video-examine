@@ -33,6 +33,12 @@ const mutations = {
 }
 
 const actions = {
+  setRole({ commit }, roles) {
+    return new Promise(resolve => {
+      commit('SET_ROLES', roles)
+      resolve()
+    })
+  },
   // user login
   login({ commit }, userInfo) {
     const { username, password } = userInfo
