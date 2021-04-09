@@ -14,7 +14,7 @@
           <el-button class="filter-item" icon="el-icon-folder-opened" @click="folderCheck">
             选择文件所属目录
           </el-button>
-          <span style="color: #909399;margin-left: 10px;">目前支持的文件格式有：{{ enableFile.join('、') }}</span>
+          <!-- <span style="color: #909399;margin-left: 10px;">目前支持的文件格式有：{{ enableFile.join('、') }}</span> -->
         </el-form-item>
         <el-form-item>
           <el-button class="filter-item" type="primary" icon="el-icon-upload" @click="createHandle">
@@ -116,7 +116,7 @@ export default {
       fakeUploadPercentage: 0,
       extsArr: [],
       checkedExts: [],
-      enableFile: ['ts', 'mp4', 'mxf', 'avi'],
+      enableFile: ['TS', 'MXF', 'MP4', 'MPG', 'MOV', 'AVI', 'MPEG', 'M2TS', 'WMV', 'FLV', 'RMVB', 'M4V', 'MP2', 'MP3', 'AAC', 'AC3'],
       inputExtVisible: false,
       inputExtValue: '',
       listLoading: false
@@ -206,7 +206,7 @@ export default {
           var file = await entry.getFile()
           file.path = this.rootDirectory + '/' + (await that.rootHandle.resolve(entry)).join('/')
           var ext = file.name.substring(file.name.lastIndexOf('.') + 1)
-          if (this.enableFile.includes(ext)) {
+          if (this.enableFile.includes(ext) || this.enableFile.includes(ext.toUpperCase()) || this.enableFile.includes(ext.toLowerCase())) {
             that.list.push({ file: file, ext: ext, percentage: 0 })
           }
         }
@@ -224,7 +224,7 @@ export default {
     },
     extFilter() {
       this.filterList = this.list.filter((fileitem, idx, arr) => {
-        return this.checkedExts.indexOf(fileitem.ext) !== -1
+        return (this.checkedExts.indexOf(fileitem.ext) !== -1 || this.checkedExts.indexOf(fileitem.ext.toUpperCase()) !== -1 || this.checkedExts.indexOf(fileitem.ext.toLowerCase()) !== -1)
       })
       // this.$nextTick(() => {
       //   if (this.filterList.length) {
