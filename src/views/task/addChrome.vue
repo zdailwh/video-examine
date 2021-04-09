@@ -1,9 +1,14 @@
 <template>
   <div class="app-container">
-    <div class="formWrap">
+    <div class="formWrap upload-file">
       <el-form ref="addForm" label-width="100px">
         <el-form-item prop="disksn" label="硬盘序列号：">
           <el-input v-model="addForm.disksn" placeholder="请输入原始硬盘序列号" />
+        </el-form-item>
+        <el-form-item label="文件类型：">
+          <el-tag v-for="tag in enableFile" :key="tag" closable :disable-transitions="false" @close="handleCloseExt(tag)">{{ tag }}</el-tag>
+          <el-input v-if="inputExtVisible" ref="saveTagInput" v-model="inputExtValue" class="input-new-tag" size="small" @keyup.enter.native="handleInputExt" @blur="handleInputExt" />
+          <el-button v-else class="button-new-tag" size="small" @click="showInputExt">+ 其他类型</el-button>
         </el-form-item>
         <el-form-item label="文件：">
           <el-button class="filter-item" icon="el-icon-folder-opened" @click="folderCheck">
@@ -112,6 +117,8 @@ export default {
       extsArr: [],
       checkedExts: [],
       enableFile: ['ts', 'mp4', 'mxf', 'avi'],
+      inputExtVisible: false,
+      inputExtValue: '',
       listLoading: false
     }
   },
@@ -160,6 +167,13 @@ export default {
       this.checkedExts = []
     },
     async folderCheck() {
+      if (!this.enableFile.length) {
+        this.$message({
+          message: '请设置需要筛选的文件类型！',
+          type: 'warning'
+        })
+        return
+      }
       this.resetFilelist()
       const parentHandle = await window.showDirectoryPicker()
       this.rootHandle = parentHandle
@@ -461,13 +475,22 @@ export default {
         item.percentage = parseInt(String((e.loaded / e.total) * 100))
       }
     },
-    getMyDate() {
-      var dateObj = new Date()
-      var m = dateObj.getMonth() + 1
-      var d = dateObj.getDate()
-      m = m < 10 ? '0' + m : m
-      d = d < 10 ? '0' + d : d
-      return '' + m + d
+    handleCloseExt(tag) {
+      this.enableFile.splice(this.enableFile.indexOf(tag), 1)
+    },
+    showInputExt() {
+      this.inputExtVisible = true
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
+    },
+    handleInputExt() {
+      const inputExtValue = this.inputExtValue
+      if (inputExtValue) {
+        this.enableFile.push(inputExtValue)
+      }
+      this.inputExtVisible = false
+      this.inputExtValue = ''
     }
   }
 }
