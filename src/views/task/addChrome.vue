@@ -30,25 +30,26 @@
     </div> -->
     <div v-show="list.length" class="fileTableWrap">
       <el-form>
-        <el-form-item label="文件类型筛选" style="margin-bottom: 10px;">
+        <el-form-item :label="'文件类型筛选（' + checkedList.length + '/' + list.length + '）'" style="margin-bottom: 10px;">
           <el-checkbox-group v-model="checkedExts" @change="extFilter">
             <el-checkbox v-for="item in extsArr" :key="item" :label="item" />
           </el-checkbox-group>
         </el-form-item>
       </el-form>
-      <el-table ref="multipleTable" :data="filterList" border fit highlight-current-row size="small" style="width: 800px;" @selection-change="handleSelectionChange">
+      <el-table ref="multipleTable" v-loading="listLoading" :data="filterList" border fit highlight-current-row size="small" style="width: 800px;" height="500" @selection-change="handleSelectionChange">
         <el-table-column type="selection" />
-        <el-table-column label="文件名" align="center">
+        <el-table-column fixed lable="序号" type="index" width="50" />
+        <el-table-column label="文件名" align="center" width="120">
           <template slot-scope="{row}">
             <span>{{ row.file.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="大小" align="center">
+        <el-table-column label="大小" align="center" width="80">
           <template slot-scope="{row}">
             <span>{{ row.file.size }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="类型" align="center">
+        <el-table-column label="类型" align="center" width="80">
           <template slot-scope="{row}">
             <span>{{ row.file.type }}</span>
           </template>
@@ -58,7 +59,7 @@
             <span>{{ row.file.path }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="上传进度" align="center">
+        <el-table-column label="上传进度" align="center" width="120">
           <template slot-scope="{row}">
             <el-progress :percentage="row.percentage" />
             <!-- <span>{{ row.percentage }}</span> -->
@@ -110,7 +111,8 @@ export default {
       fakeUploadPercentage: 0,
       extsArr: [],
       checkedExts: [],
-      enableFile: ['ts', 'mp4', 'mxf', 'avi']
+      enableFile: ['ts', 'mp4', 'mxf', 'avi'],
+      listLoading: false
     }
   },
   computed: {
@@ -162,16 +164,18 @@ export default {
       const parentHandle = await window.showDirectoryPicker()
       this.rootHandle = parentHandle
       this.rootDirectory = parentHandle.name
+      this.listLoading = true
       await this.getSub(parentHandle)
+      this.listLoading = false
 
       this.filterList = this.list
-      this.$nextTick(() => {
-        if (this.filterList) {
-          this.filterList.forEach(row => {
-            this.$refs.multipleTable.toggleRowSelection(row, true)
-          })
-        }
-      })
+      // this.$nextTick(() => {
+      //   if (this.filterList.length) {
+      //     this.filterList.forEach(row => {
+      //       this.$refs.multipleTable.toggleRowSelection(row, true)
+      //     })
+      //   }
+      // })
 
       this.getExts()
     },
@@ -182,7 +186,7 @@ export default {
           var subHandle = await parentHandle.getDirectoryHandle(entry.name, { create: false })
           await that.getSub(subHandle)
         } else if (entry.kind === 'file') {
-          that.handleList.push(entry)
+          // that.handleList.push(entry)
           // console.log(await that.rootHandle.resolve(entry))
           // console.log(await entry.getFile())
           var file = await entry.getFile()
@@ -208,13 +212,13 @@ export default {
       this.filterList = this.list.filter((fileitem, idx, arr) => {
         return this.checkedExts.indexOf(fileitem.ext) !== -1
       })
-      this.$nextTick(() => {
-        if (this.filterList) {
-          this.filterList.forEach(row => {
-            this.$refs.multipleTable.toggleRowSelection(row, true)
-          })
-        }
-      })
+      // this.$nextTick(() => {
+      //   if (this.filterList.length) {
+      //     this.filterList.forEach(row => {
+      //       this.$refs.multipleTable.toggleRowSelection(row, true)
+      //     })
+      //   }
+      // })
     },
     handleSelectionChange(val) {
       this.checkedList = val
