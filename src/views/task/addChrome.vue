@@ -56,17 +56,23 @@
         </el-table-column>
         <el-table-column label="大小" align="center" width="80">
           <template slot-scope="{row}">
-            <span>{{ row.file.size }}</span>
+            <span>{{ row.file.size | change }}</span>
           </template>
         </el-table-column>
         <el-table-column label="类型" align="center" width="80">
           <template slot-scope="{row}">
-            <span>{{ row.file.type }}</span>
+            <span>{{ row.ext }}</span>
           </template>
         </el-table-column>
         <el-table-column label="文件路径" align="center">
           <template slot-scope="{row}">
             <span>{{ row.file.path }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="计算hash进度" align="center" width="120">
+          <template slot-scope="{row}">
+            <el-progress :percentage="row.percentageHash" />
+            <!-- <span>{{ row.percentage }}</span> -->
           </template>
         </el-table-column>
         <el-table-column label="上传进度" align="center" width="120">
@@ -87,7 +93,7 @@
 </template>
 <script>
 import { createTask, mergeTask } from '@/api/task'
-const SIZE = 50 * 1024 * 1024 // 切片大小
+const SIZE = 32 * 1024 * 1024 // 切片大小
 
 const Status = {
   wait: 'wait',
@@ -95,6 +101,27 @@ const Status = {
   uploading: 'uploading'
 }
 export default {
+  filters: {
+    change(limit) {
+      var size = ''
+      if (limit < 0.1 * 1024) { // 小于0.1KB，则转化成B
+        size = limit.toFixed(2) + 'B'
+      } else if (limit < 0.1 * 1024 * 1024) { // 小于0.1MB，则转化成KB
+        size = (limit / 1024).toFixed(2) + 'KB'
+      } else if (limit < 0.1 * 1024 * 1024 * 1024) { // 小于0.1GB，则转化成MB
+        size = (limit / (1024 * 1024)).toFixed(2) + 'MB'
+      } else { // 其他转化成GB
+        size = (limit / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
+      }
+      var sizeStr = size + '' // 转成字符串
+      var index = sizeStr.indexOf('.') // 获取小数点处的索引
+      var dou = sizeStr.substr(index + 1, 2) // 获取小数点后两位的值
+      if (dou === '00') { // 判断后两位是否为00，如果是则删除00
+        return sizeStr.substring(0, index) + sizeStr.substr(index + 3, 2)
+      }
+      return size
+    }
+  },
   data() {
     return {
       handleList: [],
@@ -219,7 +246,7 @@ export default {
           file.path = this.rootDirectory + '/' + (await that.rootHandle.resolve(entry)).join('/')
           var ext = file.name.substring(file.name.lastIndexOf('.') + 1)
           if (this.enableFile.includes(ext) || this.enableFile.includes(ext.toUpperCase()) || this.enableFile.includes(ext.toLowerCase())) {
-            that.list.push({ file: file, ext: ext, percentage: 0 })
+            that.list.push({ file: file, ext: ext, percentage: 0, percentageHash: 0 })
           }
         }
       }
@@ -271,7 +298,8 @@ export default {
       const listItem = filelist[startIdx]
       const fileChunkList = this.createFileChunk(listItem.file)
       filelist[startIdx].fileChunkList = fileChunkList
-      listItem.hash = await this.calculateHash(fileChunkList)
+      console.log('切片个数：' + fileChunkList.length)
+      listItem.hash = await this.calculateHash(fileChunkList, filelist, startIdx)
       await this.createTask(listItem, startIdx).then(async(response) => {
         console.log('创建任务返回' + startIdx + '/' + response.id)
         filelist[startIdx].taskid = response.id
@@ -291,6 +319,7 @@ export default {
       }
     },
     async createTask(fileItem, idx) {
+      console.log('开始创建任务' + idx)
       var md5 = fileItem.hash
       var params = {
         disksn: this.addForm.disksn,
@@ -310,6 +339,7 @@ export default {
       })
     },
     async uploadFiles(filelist, startIdx) {
+      console.log('开始上传文件' + startIdx)
       this.currFileIdx = startIdx
       const listItem = filelist[startIdx]
       const fileChunkList = listItem.fileChunkList
@@ -453,6 +483,7 @@ export default {
     },
     // 生成文件切片
     createFileChunk(file, size = SIZE) {
+      console.log('生成文件切片')
       const fileChunkList = []
       let cur = 0
       while (cur < file.size) {
@@ -462,13 +493,14 @@ export default {
       return fileChunkList
     },
     // 生成文件 hash（web-worker）
-    calculateHash(fileChunkList) {
+    calculateHash(fileChunkList, filelist, startIdx) {
+      console.log('开始计算hash')
       return new Promise(resolve => {
         this.container.worker = new Worker('/filereview/hash.js')
         this.container.worker.postMessage({ fileChunkList })
         this.container.worker.onmessage = e => {
           const { percentage, hash } = e.data
-          this.hashPercentage = percentage
+          filelist[startIdx].percentageHash = parseInt(percentage)
           if (hash) {
             resolve(hash)
           }
