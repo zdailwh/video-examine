@@ -3,7 +3,12 @@
     <div class="formWrap upload-file">
       <el-form ref="addForm" label-width="100px">
         <el-form-item prop="disksn" label="硬盘序列号：">
-          <el-input v-model="addForm.disksn" placeholder="请输入原始硬盘序列号" />
+          <span v-if="!!$route.params.disksn">{{ addForm.disksn }}</span>
+          <el-input v-else v-model="addForm.disksn" placeholder="请输入原始硬盘序列号" />
+        </el-form-item>
+        <el-form-item prop="groupname" label="任务组名称：">
+          <span v-if="!!$route.params.groupname">{{ addForm.groupname }}</span>
+          <el-input v-else v-model="addForm.groupname" placeholder="请输入任务组名称" />
         </el-form-item>
         <el-form-item label="文件类型：">
           <el-tag v-for="tag in enableFile" :key="tag" closable :disable-transitions="false" @close="handleCloseExt(tag)">{{ tag }}</el-tag>
@@ -98,7 +103,8 @@ export default {
       checkedList: [],
       rootHandle: {},
       addForm: {
-        disksn: ''
+        disksn: '',
+        groupname: ''
       },
       Status,
       container: {
@@ -147,6 +153,12 @@ export default {
     }
   },
   created() {
+    if (this.$route.params.disksn) {
+      this.addForm.disksn = this.$route.params.disksn
+    }
+    if (this.$route.params.groupname) {
+      this.addForm.groupname = this.$route.params.groupname
+    }
   },
   mounted() {
   },

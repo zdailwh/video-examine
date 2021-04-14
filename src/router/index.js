@@ -108,6 +108,7 @@ export const constantRoutes = [
         path: 'add',
         component: () => import('@/views/task/addChrome'),
         name: 'TaskAdd',
+        hidden: true,
         meta: { title: '新建任务', icon: 'el-icon-document-add' }
       },
       {

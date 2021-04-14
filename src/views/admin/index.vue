@@ -21,9 +21,9 @@
       <el-form-item>
         <el-button @click="resetForm('filterForm')">重置</el-button>
       </el-form-item>
-      <el-button v-if="$store.state.user.isadmin !== '' && $store.state.user.isadmin !== 0" class="filter-item" type="primary" icon="el-icon-plus" @click="dialogVisibleAdd = true">
-        创建用户
-      </el-button>
+      <el-form-item>
+        <el-button v-if="$store.state.user.isadmin !== '' && $store.state.user.isadmin !== 0" class="filter-item" type="primary" icon="el-icon-plus" @click="dialogVisibleAdd = true">创建用户</el-button>
+      </el-form-item>
     </el-form>
 
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
