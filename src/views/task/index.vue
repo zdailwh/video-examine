@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form ref="filterForm" :model="filterForm" :inline="true">
+    <el-form ref="filterForm" :model="filterForm" :inline="true" class="filter-form">
       <el-form-item prop="disksn">
         <el-input v-model="filterForm.disksn" placeholder="硬盘序列号" style="width:120px" />
       </el-form-item>
@@ -48,11 +48,8 @@
       <el-form-item>
         <el-button @click="resetForm('filterForm')">重置</el-button>
       </el-form-item>
-    </el-form>
-
-    <div style="margin-bottom: 20px;">
       <el-button class="filter-item" type="danger" icon="el-icon-delete" :disabled="!selectedItems.length" @click="handleDelSelected">批量删除</el-button>
-    </div>
+    </el-form>
 
     <el-table v-loading="listLoading" :data="list" :row-class-name="tableRowClassName" border fit highlight-current-row style="width: 100%;" @selection-change="handleSelectionChange">
       <el-table-column type="selection" />

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form ref="filterForm" :model="filterForm" :inline="true">
+    <el-form ref="filterForm" :model="filterForm" :inline="true" class="filter-form">
       <el-form-item prop="create_time_range">
         <el-date-picker
           v-model="filterForm.create_time_range"

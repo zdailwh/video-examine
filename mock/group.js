@@ -18,6 +18,19 @@ for (let i = 0; i < count; i++) {
   }))
 }
 
+const group = Mock.mock({
+  id: '@increment',
+  create_time: '@datetime',
+  disksn: '1239876',
+  createdate: '@date',
+  totalcount: 12,
+  finishcount: 5,
+  errorcount: 7,
+  faultcount: 14,
+  'status|1': [0, 1],
+  'statusstr|1': ['有效', '无效']
+})
+
 module.exports = [
   {
     url: '/admin/review/v1/filegroups',
@@ -42,6 +55,13 @@ module.exports = [
         total: mockList.length,
         items: pageList
       }
+    }
+  },
+  {
+    url: '/admin/review/v1/filegroups/[0-9]',
+    type: 'delete',
+    response: config => {
+      return group
     }
   }
 ]

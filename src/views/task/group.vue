@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form ref="filterForm" :model="filterForm" :inline="true">
+    <el-form ref="filterForm" :model="filterForm" :inline="true" class="filter-form">
       <el-form-item prop="disksn">
         <el-input v-model="filterForm.disksn" placeholder="硬盘序列号" style="width:120px" />
       </el-form-item>
@@ -88,8 +88,9 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
-        <template slot-scope="{row}">
+        <template slot-scope="{row, $index}">
           <el-button type="text" size="medium"><router-link :to="{name: 'Task', params: {disksn: row.disksn, createdate: row.createdate}}">查看子任务</router-link></el-button>
+          <el-button type="text" size="medium" @click="delHandle(row.id, $index)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -100,7 +101,7 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/group'
+import { fetchList, deleteGroup } from '@/api/group'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
@@ -169,6 +170,31 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
+    },
+    delHandle(id, idx) {
+      this.$confirm(`此操作将删除任务组的同时，同步删除对应的所有任务, 是否继续?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.delGroup(id, idx)
+      }).catch(() => {
+        console.log('已取消删除')
+      })
+    },
+    delGroup(id, idx) {
+      deleteGroup({ id: id }).then(response => {
+        this.$message({
+          message: '删除成功！',
+          type: 'success'
+        })
+        this.getList()
+      }).catch(error => {
+        this.$message({
+          message: error.message || '操作失败！',
+          type: 'error'
+        })
+      })
     }
   }
 }

@@ -26,3 +26,10 @@ export function fetchList(query) {
     params
   })
 }
+
+export function deleteGroup(query) {
+  return request({
+    url: '/admin/review/v1/filegroups/' + query.id + '/delete',
+    method: 'get'
+  })
+}
