@@ -91,12 +91,12 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column label="ID" align="center" width="80px">
+      <el-table-column label="ID" align="center" width="80">
         <template slot-scope="{row}">
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="原始硬盘序列号" align="center" width="100px">
+      <el-table-column label="原始硬盘序列号" align="center" width="150">
         <template slot-scope="{row}">
           <span>{{ row.disksn }}</span>
         </template>
@@ -106,50 +106,50 @@
           <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="文件大小" align="center">
+      <el-table-column label="文件大小" align="center" width="80">
         <template slot-scope="{row}">
           <span>{{ row.sizestr }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="优先级" align="center" width="50px">
+      <el-table-column label="优先级" align="center" width="50">
         <template slot-scope="{row}">
           <span>{{ row.prority }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="重试次数" align="center" width="50px">
+      <el-table-column label="重试次数" align="center" width="50">
         <template slot-scope="{row}">
           <span>{{ row.retry }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建日期" align="center">
+      <el-table-column label="创建日期" align="center" width="100">
         <template slot-scope="{row}">
           <span>{{ row.createdate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="最近审核" align="center">
+      <el-table-column label="最近审核" align="center" width="100">
         <template slot-scope="{row}">
           <span>{{ row.reviewtime }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="完成时间" align="center">
+      <el-table-column label="完成时间" align="center" width="100">
         <template slot-scope="{row}">
           <span>{{ row.finishtime }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="故障点" align="center">
+      <el-table-column label="故障点" align="center" width="80" fixed="right">
         <template slot-scope="{row}">
           <span v-if="parseInt(row.filestatus) === 2" style="color: #F56C6C;font-weight: bold;">{{ row.filestatustr }}</span>
           <span v-else>{{ row.filestatustr }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="任务状态" align="center">
+      <el-table-column label="任务状态" align="center" width="100" fixed="right">
         <template slot-scope="{row}">
           <el-tag :type="row.statusstr | statusFilter">
             {{ row.statusstr }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" width="210" fixed="right">
         <template slot-scope="{row, $index}">
           <el-button type="text" size="medium" @click="editHandle(row, $index)">编辑</el-button>
           <el-popover

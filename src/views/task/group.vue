@@ -49,7 +49,7 @@
     </el-form>
 
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
-      <el-table-column label="ID" align="center">
+      <el-table-column label="ID" align="center" width="80">
         <template slot-scope="{row}">
           <span>{{ row.id }}</span>
         </template>
@@ -59,43 +59,43 @@
           <span>{{ row.groupname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="原始硬盘序列号" align="center">
+      <el-table-column label="原始硬盘序列号" align="center" width="150">
         <template slot-scope="{row}">
           <span>{{ row.disksn }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建日期" align="center">
+      <el-table-column label="创建日期" align="center" width="115">
         <template slot-scope="{row}">
           <span>{{ row.createdate }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="任务总数" align="center">
+      <el-table-column label="任务总数" align="center" width="100">
         <template slot-scope="{row}">
           <span>{{ row.totalcount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="成功任务数" align="center">
+      <el-table-column label="成功任务数" align="center" width="100">
         <template slot-scope="{row}">
           <span>{{ row.finishcount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="异常任务数" align="center">
+      <el-table-column label="异常任务数" align="center" width="80">
         <template slot-scope="{row}">
           <span>{{ row.errorcount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="故障视频数" align="center">
+      <el-table-column label="故障视频数" align="center" width="80">
         <template slot-scope="{row}">
           <span>{{ row.faultcount }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center">
+      <el-table-column label="状态" align="center" width="100" fixed="right">
         <template slot-scope="{row}">
           <el-tag v-if="row.status === 0" type="success">{{ row.statusstr }}</el-tag>
           <el-tag v-else type="info">{{ row.statusstr }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" width="210" fixed="right">
         <template slot-scope="{row, $index}">
           <el-button type="text" size="medium"><router-link :to="{name: 'Task', params: {disksn: row.disksn, createdate: row.createdate}}">查看子任务</router-link></el-button>
           <el-button type="text" size="medium" @click="delHandle(row.id, $index)">删除</el-button>
