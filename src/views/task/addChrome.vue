@@ -183,13 +183,13 @@ export default {
       this.listLoading = false
 
       this.filterList = this.list
-      // this.$nextTick(() => {
-      //   if (this.filterList.length) {
-      //     this.filterList.forEach(row => {
-      //       this.$refs.multipleTable.toggleRowSelection(row, true)
-      //     })
-      //   }
-      // })
+      this.$nextTick(() => {
+        if (this.filterList.length) {
+          this.filterList.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row, true)
+          })
+        }
+      })
 
       this.getExts()
     },
@@ -226,13 +226,13 @@ export default {
       this.filterList = this.list.filter((fileitem, idx, arr) => {
         return (this.checkedExts.indexOf(fileitem.ext) !== -1 || this.checkedExts.indexOf(fileitem.ext.toUpperCase()) !== -1 || this.checkedExts.indexOf(fileitem.ext.toLowerCase()) !== -1)
       })
-      // this.$nextTick(() => {
-      //   if (this.filterList.length) {
-      //     this.filterList.forEach(row => {
-      //       this.$refs.multipleTable.toggleRowSelection(row, true)
-      //     })
-      //   }
-      // })
+      this.$nextTick(() => {
+        if (this.filterList.length) {
+          this.filterList.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row, true)
+          })
+        }
+      })
     },
     handleSelectionChange(val) {
       this.checkedList = val
