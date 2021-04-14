@@ -161,7 +161,7 @@
             </div>
             <el-button slot="reference" type="text" size="medium" style="margin-left: 10px;">删除</el-button>
           </el-popover>
-          <el-button v-if="row.result !== ''" type="text" size="medium" style="margin-left: 10px;"><router-link :to="{name: 'TaskDetail', params: {result: row.result}}">查看结果</router-link></el-button>
+          <el-button v-if="parseInt(row.filestatus) === 2" type="text" size="medium" style="margin-left: 10px;"><router-link :to="{name: 'TaskDetail', params: {result: row.result}}">查看结果</router-link></el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -253,21 +253,30 @@ export default {
         return
       }
 
-      await this.createTasks(this.checkedList)
+      await this.createTasks(this.checkedList, 0)
     },
-    async createTasks(filelist) {
-      const requestList = filelist.map(async(listItem, idx, arr) => {
-        const fileChunkList = this.createFileChunk(listItem.file)
-        filelist[idx].fileChunkList = fileChunkList
-        filelist[idx].hash = await this.calculateHash(fileChunkList)
-        await this.createTask(listItem, idx)
+    async createTasks(filelist, startIdx) {
+      const listItem = filelist[startIdx]
+      const fileChunkList = this.createFileChunk(listItem.file)
+      filelist[startIdx].fileChunkList = fileChunkList
+      listItem.hash = await this.calculateHash(fileChunkList)
+      await this.createTask(listItem, startIdx).then(async(response) => {
+        console.log('创建任务返回' + startIdx + '/' + response.id)
+        filelist[startIdx].taskid = response.id
+
+        await this.uploadFiles(filelist, startIdx)
+      }).catch({
+        // console.log(error)
       })
-      await Promise.all(requestList)
-      this.$message({
-        message: '任务创建成功，开始上传文件！',
-        type: 'success'
-      })
-      await this.uploadFiles(filelist, 0)
+
+      if (startIdx < filelist.length - 1) {
+        await this.createTasks(filelist, startIdx + 1)
+      } else {
+        this.$message({
+          message: '文件已全部上传！',
+          type: 'success'
+        })
+      }
     },
     async createTask(fileItem, idx) {
       var md5 = fileItem.hash
@@ -282,8 +291,7 @@ export default {
       }
       return new Promise((resolve, reject) => {
         createTask(params).then(response => {
-          this.checkedList[idx].taskid = response.id
-          resolve()
+          resolve(response)
         }).catch(error => {
           reject(error)
         })
@@ -294,13 +302,26 @@ export default {
       const listItem = filelist[startIdx]
       const fileChunkList = listItem.fileChunkList
       this.container.file = listItem.file
-      // this.resetData()
-      // Object.assign(this.$data, this.$options.data())
-      // this.container.file = file
 
-      // this.status = Status.uploading
-      // const fileChunkList = this.createFileChunk(this.container.file)
-      // this.container.hash = await this.calculateHash(fileChunkList)
+      var requestList = []
+      // this.chunkData = fileChunkList.map(({ file }, index) => ({
+      //   taskid: listItem.taskid,
+      //   fileHash: listItem.hash,
+      //   index,
+      //   hash: listItem.hash + '-' + index,
+      //   chunk: file,
+      //   size: file.size,
+      //   percentage: 0
+      // }))
+
+      // requestList = await this.uploadChunks(this.chunkData)
+      // await Promise.all(requestList).then(async(result) => {
+      //   // 合并切片
+      //   await this.mergeRequest(listItem.taskid)
+      // }).catch((error) => {
+      //   console.log('分片上传失败了')
+      //   console.log(error)
+      // })
 
       var verifyRes = await this.verifyUpload(listItem.hash)
       if (verifyRes === '资源不存在') {
@@ -315,7 +336,14 @@ export default {
           percentage: 0
         }))
 
-        await this.uploadChunks()
+        requestList = await this.uploadChunks(this.chunkData)
+        await Promise.all(requestList).then(async(result) => {
+          // 合并切片
+          await this.mergeRequest(listItem.taskid)
+        }).catch((error) => {
+          console.log('分片上传失败了')
+          console.log(error)
+        })
       } else if (verifyRes.file) {
         // 若file有值，说明已完成上传，前端不需要再传输任何分片文件
         this.checkedList[startIdx].percentage = 100
@@ -332,13 +360,14 @@ export default {
           percentage: uploadedList.includes(listItem.hash + '-' + index) ? 100 : 0
         }))
 
-        await this.uploadChunks(uploadedList)
-      }
-
-      if (startIdx < filelist.length - 1) {
-        await this.uploadFiles(filelist, startIdx + 1)
-      } else {
-        console.log('所有文件上传结束')
+        requestList = await this.uploadChunks(this.chunkData, uploadedList)
+        await Promise.all(requestList).then(async(result) => {
+          // 合并切片
+          await this.mergeRequest(listItem.taskid)
+        }).catch((error) => {
+          console.log('分片上传失败了')
+          console.log(error)
+        })
       }
     },
     // 暂停
@@ -363,15 +392,15 @@ export default {
       await this.uploadChunks(uploadedList)
     },
     // 上传切片，同时过滤已上传的切片
-    async uploadChunks(uploadedList = []) {
-      const requestList = this.chunkData
+    async uploadChunks(chunkData, uploadedList = []) {
+      const requestList = chunkData
         .filter(({ hash }) => !uploadedList.includes(hash))
         .map(({ taskid, fileHash, chunk, hash, index }) => {
           const formData = new FormData()
           formData.append('reviewId', taskid)
           formData.append('chunk', chunk)
           formData.append('hash', hash)
-          formData.append('chunkTotal', this.chunkData.length)
+          formData.append('chunkTotal', chunkData.length)
           formData.append('fileHash', fileHash)
           return { formData, index }
         })
@@ -380,20 +409,11 @@ export default {
             url: '/api/admin/review/v1/chunks',
             method: 'post',
             data: formData,
-            onProgress: this.createProgressHandler(this.chunkData[index]),
+            onProgress: this.createProgressHandler(chunkData[index]),
             requestList: this.requestList
           })
         )
-      await Promise.all(requestList).then(async(result) => {
-        console.log(result)
-        // 之前上传的切片数量 + 本次上传的切片数量 = 所有切片数量时
-        // 合并切片
-        if (uploadedList.length + requestList.length === this.chunkData.length) {
-          await this.mergeRequest(this.checkedList[this.currFileIdx].taskid)
-        }
-      }).catch((error) => {
-        console.log(error)
-      })
+      return requestList
     },
     // xhr
     myRequest({ url, method, data, headers = {}, onProgress = e => e, requestList }) {
