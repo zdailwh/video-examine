@@ -29,15 +29,6 @@
       </el-form>
     </div>
 
-    <!-- <div>
-      <el-button v-if="status === Status.pause" @click="handleResume">恢复</el-button>
-      <el-button v-else :disabled="status !== Status.uploading || !container.hash" @click="handlePause">暂停</el-button>
-
-      <div>计算文件 hash</div>
-      <el-progress :percentage="hashPercentage" />
-      <div>总进度</div>
-      <el-progress :percentage="fakeUploadPercentage" />
-    </div> -->
     <div v-show="list.length" class="fileTableWrap">
       <el-form>
         <el-form-item :label="'文件类型筛选（' + checkedList.length + '/' + list.length + '）'" style="margin-bottom: 10px;">
@@ -95,11 +86,6 @@
 import { createTask, mergeTask } from '@/api/task'
 const SIZE = 32 * 1024 * 1024 // 切片大小
 
-const Status = {
-  wait: 'wait',
-  pause: 'pause',
-  uploading: 'uploading'
-}
 export default {
   filters: {
     change(limit) {
@@ -133,20 +119,14 @@ export default {
         disksn: '',
         groupname: ''
       },
-      Status,
       container: {
         file: null,
         hash: '',
         worker: null
       },
       hashPercentage: 0,
-      currFileIdx: 0,
       chunkData: [],
       requestList: [],
-      status: Status.wait,
-      // 当暂停时会取消 xhr 导致进度条后退
-      // 为了避免这种情况，需要定义一个假的进度条
-      fakeUploadPercentage: 0,
       extsArr: [],
       checkedExts: [],
       enableFile: ['TS', 'MXF', 'MP4', 'MPG', 'MOV', 'AVI', 'MPEG', 'M2TS', 'WMV', 'FLV', 'RMVB', 'M4V', 'MP2', 'MP3', 'AAC', 'AC3'],
@@ -156,28 +136,6 @@ export default {
     }
   },
   computed: {
-    uploadDisabled() {
-      return (
-        !this.container.file ||
-        [Status.pause, Status.uploading].includes(this.status)
-      )
-    },
-    uploadPercentage() {
-      if (!this.container.file || !this.chunkData.length) return 0
-      const loaded = this.chunkData
-        .map(item => item.size * item.percentage)
-        .reduce((acc, cur) => acc + cur)
-      return parseInt((loaded / this.container.file.size).toFixed(2))
-    }
-  },
-  watch: {
-    uploadPercentage(now) {
-      this.checkedList[this.currFileIdx].percentage = now > 100 ? 100 : now
-
-      if (now > this.fakeUploadPercentage) {
-        this.fakeUploadPercentage = now
-      }
-    }
   },
   created() {
     if (this.$route.params.disksn) {
@@ -298,13 +256,13 @@ export default {
       const listItem = filelist[startIdx]
       const fileChunkList = this.createFileChunk(listItem.file)
       filelist[startIdx].fileChunkList = fileChunkList
-      console.log('切片个数：' + fileChunkList.length)
+      console.log(startIdx + '切片个数：' + fileChunkList.length)
       listItem.hash = await this.calculateHash(fileChunkList, filelist, startIdx)
       await this.createTask(listItem, startIdx).then(async(response) => {
         console.log('创建任务返回' + startIdx + '/' + response.id)
         filelist[startIdx].taskid = response.id
 
-        await this.uploadFiles(filelist, startIdx)
+        this.uploadFiles(filelist, startIdx)
       }).catch({
         // console.log(error)
       })
@@ -340,10 +298,8 @@ export default {
     },
     async uploadFiles(filelist, startIdx) {
       console.log('开始上传文件' + startIdx)
-      this.currFileIdx = startIdx
       const listItem = filelist[startIdx]
       const fileChunkList = listItem.fileChunkList
-      this.container.file = listItem.file
 
       var requestList = []
       // this.chunkData = fileChunkList.map(({ file }, index) => ({
@@ -356,7 +312,7 @@ export default {
       //   percentage: 0
       // }))
 
-      // requestList = await this.uploadChunks(this.chunkData)
+      // requestList = await this.uploadChunks(filelist, startIdx, this.chunkData)
       // await Promise.all(requestList).then(async(result) => {
       //   // 合并切片
       //   await this.mergeRequest(listItem.taskid)
@@ -378,7 +334,7 @@ export default {
           percentage: 0
         }))
 
-        requestList = await this.uploadChunks(this.chunkData)
+        requestList = await this.uploadChunks(filelist, startIdx, this.chunkData)
         await Promise.all(requestList).then(async(result) => {
           // 合并切片
           await this.mergeRequest(listItem.taskid)
@@ -402,7 +358,7 @@ export default {
           percentage: uploadedList.includes(listItem.hash + '-' + index) ? 100 : 0
         }))
 
-        requestList = await this.uploadChunks(this.chunkData, uploadedList)
+        requestList = await this.uploadChunks(filelist, startIdx, this.chunkData, uploadedList)
         await Promise.all(requestList).then(async(result) => {
           // 合并切片
           await this.mergeRequest(listItem.taskid)
@@ -412,29 +368,8 @@ export default {
         })
       }
     },
-    // 暂停
-    handlePause() {
-      this.status = Status.pause
-      this.resetData()
-    },
-    resetData() {
-      this.requestList.forEach(xhr => xhr?.abort())
-      this.requestList = []
-      if (this.container.worker) {
-        this.container.worker.onmessage = null
-      }
-    },
-    // 恢复
-    async handleResume() {
-      this.status = Status.uploading
-      const { uploadedList } = await this.verifyUpload(
-        this.container.file.name,
-        this.container.hash
-      )
-      await this.uploadChunks(uploadedList)
-    },
     // 上传切片，同时过滤已上传的切片
-    async uploadChunks(chunkData, uploadedList = []) {
+    async uploadChunks(filelist, startIdx, chunkData, uploadedList = []) {
       const requestList = chunkData
         .filter(({ hash }) => !uploadedList.includes(hash))
         .map(({ taskid, fileHash, chunk, hash, index }) => {
@@ -451,7 +386,7 @@ export default {
             url: '/api/admin/review/v1/chunks',
             method: 'post',
             data: formData,
-            onProgress: this.createProgressHandler(chunkData[index]),
+            onProgress: this.createProgressHandler(chunkData[index], filelist, startIdx, chunkData),
             requestList: this.requestList
           })
         )
@@ -483,7 +418,6 @@ export default {
     },
     // 生成文件切片
     createFileChunk(file, size = SIZE) {
-      console.log('生成文件切片')
       const fileChunkList = []
       let cur = 0
       while (cur < file.size) {
@@ -494,7 +428,7 @@ export default {
     },
     // 生成文件 hash（web-worker）
     calculateHash(fileChunkList, filelist, startIdx) {
-      console.log('开始计算hash')
+      console.log('开始计算hash' + startIdx)
       return new Promise(resolve => {
         this.container.worker = new Worker('/filereview/hash.js')
         this.container.worker.postMessage({ fileChunkList })
@@ -534,9 +468,15 @@ export default {
       return JSON.parse(data)
     },
     // 用闭包保存每个 chunk 的进度数据
-    createProgressHandler(item) {
+    createProgressHandler(item, filelist, startIdx, chunkData) {
       return e => {
         item.percentage = parseInt(String((e.loaded / e.total) * 100))
+
+        const loaded = chunkData
+          .map(item => item.size * item.percentage)
+          .reduce((acc, cur) => acc + cur)
+        const per = parseInt((loaded / filelist[startIdx].file.size).toFixed(2))
+        filelist[startIdx].percentage = per > 100 ? 100 : per
       }
     },
     handleCloseExt(tag) {
