@@ -270,10 +270,10 @@ export default {
       if (this.filterForm.createdate !== '') {
         this.listQuery.createdate = this.filterForm.createdate
       }
-      if (this.filterForm.create_time_range.length) {
+      if (this.filterForm.create_time_range && this.filterForm.create_time_range.length) {
         this.listQuery.create_time_range = this.filterForm.create_time_range
       }
-      if (this.filterForm.update_time_range.length) {
+      if (this.filterForm.update_time_range && this.filterForm.update_time_range.length) {
         this.listQuery.update_time_range = this.filterForm.update_time_range
       }
       if (this.filterForm.status !== '') {
