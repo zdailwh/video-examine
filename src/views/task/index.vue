@@ -96,7 +96,7 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="原始硬盘序列号" align="center" width="150">
+      <el-table-column label="原始硬盘序列号" align="center" width="100">
         <template slot-scope="{row}">
           <span>{{ row.disksn }}</span>
         </template>
@@ -149,7 +149,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="210" fixed="right">
+      <el-table-column label="操作" align="center" width="100" fixed="right">
         <template slot-scope="{row, $index}">
           <el-button type="text" size="medium" @click="editHandle(row, $index)">编辑</el-button>
           <el-popover
@@ -293,6 +293,7 @@ export default {
         update_time_range: [],
         status: ''
       }
+      this.handleFilter()
     },
     delTask(id, idx) {
       deleteTask({ id: id }).then(response => {

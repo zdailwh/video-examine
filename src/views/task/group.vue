@@ -179,6 +179,7 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
+      this.handleFilter()
     },
     delHandle(id, idx) {
       this.$confirm(`此操作将删除任务组的同时，同步删除对应的所有任务, 是否继续?`, '提示', {
