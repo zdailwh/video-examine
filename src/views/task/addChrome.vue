@@ -430,7 +430,7 @@ export default {
     calculateHash(fileChunkList, filelist, startIdx) {
       console.log('开始计算hash' + startIdx)
       return new Promise(resolve => {
-        this.container.worker = new Worker('/filereview/hash.js')
+        this.container.worker = new Worker('/hash.js')
         this.container.worker.postMessage({ fileChunkList })
         this.container.worker.onmessage = e => {
           const { percentage, hash } = e.data
