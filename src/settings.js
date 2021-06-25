@@ -1,5 +1,5 @@
 module.exports = {
-  title: '预审系统',
+  title: '节目素材自动技审系统',
 
   /**
    * @type {boolean} true | false
