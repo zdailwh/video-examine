@@ -6,7 +6,7 @@
           <el-card shadow="always">
             <div class="spaceWrap">
               <p>
-                <el-progress :percentage="parseInt(((space.total - space.avail) / space.total) * 100)" :color="customColorMethod" />
+                <el-progress :percentage="parseInt(((space.total - space.avail) / space.total) * 100)" :color="customColorMethod" :stroke-width="15" style="margin-bottom: 10px;" />
                 {{ (space.avail / 1024).toFixed(3) }} GB 可用 ， 共 {{ (space.total / 1024).toFixed(3) }} GB
               </p>
               <p>
@@ -28,13 +28,13 @@
                 <el-slider v-model="formdata.thread" :min="1" :max="8" show-input />
               </el-form-item>
               <el-form-item label="黑场最小门限(单位s)" prop="black_d">
-                <el-slider v-model="formdata.black_d" :min="1" :max="99" show-input />
+                <el-slider v-model="formdata.black_d" :min="1" :max="15" show-input />
               </el-form-item>
               <el-form-item label="黑场判断阈值" prop="black_th">
-                <el-slider v-model="formdata.black_th" :min="0.9" :max="0.999" :step="0.001" show-input />
+                <el-slider v-model="formdata.black_th" :min="0.99" :max="0.999" :step="0.001" show-input />
               </el-form-item>
               <el-form-item label="静帧最小门限(单位s)" prop="freeze_d">
-                <el-slider v-model="formdata.freeze_d" :min="1" :max="99" show-input />
+                <el-slider v-model="formdata.freeze_d" :min="1" :max="15" show-input />
               </el-form-item>
               <el-form-item label="爆音高门限分贝" prop="sonic_hi">
                 <el-slider v-model="formdata.sonic_hi" :min="0" :max="5" show-input />
@@ -43,8 +43,11 @@
                 <el-slider v-model="formdata.sonic_low" :min="-10" :max="-1" show-input />
               </el-form-item>
               <el-form-item>
+                <el-button class="filter-item" @click="reset">
+                  恢复默认值
+                </el-button>
                 <el-button class="filter-item" type="primary" @click="commit">
-                  更新配置
+                  提交配置
                 </el-button>
               </el-form-item>
             </el-form>
@@ -60,6 +63,14 @@ export default {
   data() {
     return {
       space: {},
+      resetdata: {
+        thread: 5,
+        black_d: 5,
+        black_th: 0.995,
+        freeze_d: 5,
+        sonic_hi: 0,
+        sonic_low: -3
+      },
       formdata: {
         thread: null,
         black_d: null,
@@ -161,6 +172,9 @@ export default {
           type: 'error'
         })
       })
+    },
+    reset() {
+      this.formdata = JSON.parse(JSON.stringify(this.resetdata))
     }
   }
 }
