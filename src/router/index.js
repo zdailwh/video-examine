@@ -154,6 +154,12 @@ export const asyncRoutes = [
         component: () => import('@/views/admin/index'),
         name: 'AdminList',
         meta: { title: '用户管理', icon: 'peoples', roles: ['admin'] }
+      },
+      {
+        path: 'pwdSet',
+        component: () => import('@/views/admin/pwdSet'),
+        name: 'AdminPwdSet',
+        meta: { title: '密码强度设置', icon: 'el-icon-lock', roles: ['admin'] }
       }
     ]
   },
