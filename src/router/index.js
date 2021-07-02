@@ -73,77 +73,7 @@ export const constantRoutes = [
   {
     path: '/',
     redirect: '/task/group'
-  },
-  {
-    path: '/task',
-    component: Layout,
-    redirect: '/task/group',
-    meta: { title: '任务管理', icon: 'el-icon-s-flag' },
-    children: [
-      {
-        path: 'group',
-        component: () => import('@/views/task/group'),
-        name: 'TaskGroup',
-        meta: { title: '任务组', icon: 'el-icon-s-order', affix: true }
-      },
-      {
-        path: 'index',
-        component: () => import('@/views/task/index'),
-        name: 'Task',
-        meta: { title: '任务列表', icon: 'el-icon-s-order', affix: true }
-      },
-      {
-        path: 'add',
-        component: () => import('@/views/task/addChrome'),
-        name: 'TaskAdd',
-        hidden: true,
-        meta: { title: '新建任务', icon: 'el-icon-document-add' }
-      },
-      {
-        path: 'view',
-        component: () => import('@/views/task/detail'),
-        name: 'TaskDetail',
-        hidden: true,
-        meta: { title: '查看任务' }
-      }
-    ]
-  },
-  {
-    path: '/device',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/device/index'),
-        name: 'Device',
-        meta: { title: '设备配置', icon: 'el-icon-s-tools', affix: true }
-      }
-    ]
-  },
-  {
-    path: '/admin',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/admin/index'),
-        name: 'Finger',
-        meta: { title: '用户管理', icon: 'peoples', affix: true }
-      }
-    ]
   }
-  // {
-  //   path: '/preview',
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: 'index',
-  //       component: () => import('@/views/preview/index'),
-  //       name: 'Preview',
-  //       meta: { title: '总览', icon: 'dashboard', affix: true }
-  //     }
-  //   ]
-  // },
 ]
 
 /**
@@ -151,6 +81,82 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  {
+    path: '/task',
+    component: Layout,
+    redirect: '/task/group',
+    name: 'Task',
+    meta: { title: '任务管理', icon: 'el-icon-s-flag' },
+    children: [
+      {
+        path: 'group',
+        component: () => import('@/views/task/group'),
+        name: 'TaskGroup',
+        meta: { title: '任务组', icon: 'el-icon-s-order', affix: true, roles: ['admin', 'editor'] }
+      },
+      {
+        path: 'index',
+        component: () => import('@/views/task/index'),
+        name: 'TaskList',
+        meta: { title: '任务列表', icon: 'el-icon-s-order', affix: true, roles: ['admin', 'editor'] }
+      },
+      {
+        path: 'add',
+        component: () => import('@/views/task/addChrome'),
+        name: 'TaskAdd',
+        hidden: true,
+        meta: { title: '新建任务', icon: 'el-icon-document-add', roles: ['admin', 'editor'] }
+      },
+      {
+        path: 'view',
+        component: () => import('@/views/task/detail'),
+        name: 'TaskDetail',
+        hidden: true,
+        meta: { title: '查看任务', roles: ['admin', 'editor'] }
+      }
+    ]
+  },
+  {
+    path: '/device',
+    component: Layout,
+    name: 'Device',
+    meta: { title: '设备配置', icon: 'el-icon-s-tools', roles: ['admin'] },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/device/index'),
+        name: 'DeviceSetting',
+        meta: { title: '设备配置', icon: 'el-icon-s-tools', affix: true, roles: ['admin'] }
+      }
+    ]
+  },
+  {
+    path: '/admin',
+    component: Layout,
+    name: 'Admin',
+    redirect: '/admin/edit',
+    meta: { title: '用户管理', icon: 'peoples', roles: ['admin', 'editor'] },
+    children: [
+      {
+        path: 'edit',
+        component: () => import('@/views/admin/edit'),
+        name: 'AdminEdit',
+        meta: { title: '编辑个人信息', icon: 'el-icon-user-solid', roles: ['admin', 'editor'] }
+      },
+      {
+        path: 'updatePwd',
+        component: () => import('@/views/admin/updatePwd'),
+        name: 'AdminUpdatePwd',
+        meta: { title: '修改密码', icon: 'el-icon-edit', roles: ['admin', 'editor'] }
+      },
+      {
+        path: 'index',
+        component: () => import('@/views/admin/index'),
+        name: 'AdminList',
+        meta: { title: '用户管理', icon: 'peoples', roles: ['admin'] }
+      }
+    ]
+  },
   // {
   //   path: '/permission',
   //   component: Layout,

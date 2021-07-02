@@ -18,16 +18,16 @@
         </el-form-item>
         <el-form-item label="标识" prop="isadmin">
           <el-select v-model="formadd.isadmin" placeholder="请选择管理员标识">
-            <el-option label="操作员" value="0" />
-            <el-option label="管理员" value="1" />
-            <el-option label="超级管理员" value="2" />
+            <el-option label="操作员" :value="0" />
+            <el-option label="管理员" :value="1" />
+            <el-option label="超级管理员" :value="2" />
           </el-select>
         </el-form-item>
       </el-form>
     </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="reset">取 消</el-button>
-      <el-button type="primary" @click="commit">确 定</el-button>
+      <el-button type="primary" :loading="loading" @click="commit">确 定</el-button>
     </span>
   </el-dialog>
 </template>
@@ -42,6 +42,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       formadd: {
         username: '',
         password: '',
@@ -50,12 +51,12 @@ export default {
       },
       ruleValidate: {
         username: [
-          { required: true, type: 'string', message: '姓名不能为空', trigger: 'blur' },
-          { type: 'string', message: '用户名为2-8位字符', min: 2, max: 8, trigger: 'blur' }
+          { required: true, type: 'string', message: '姓名不能为空', trigger: 'blur' }
+          // { type: 'string', message: '用户名为2-8位字符', min: 2, max: 8, trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '密码不能为空', trigger: 'blur' },
-          { type: 'string', message: '密码为6-12位字符', min: 6, max: 12, trigger: 'blur' }
+          { required: true, message: '密码不能为空', trigger: 'blur' }
+          // { type: 'string', message: '密码为6-12位字符', min: 6, max: 12, trigger: 'blur' }
         ],
         mobile: [
           { required: true, message: '手机号码不能为空', trigger: 'blur' },
@@ -82,6 +83,7 @@ export default {
     },
     createUser() {
       console.log(this.formadd)
+      this.loading = true
       createUser(this.formadd).then(response => {
         this.$message({
           message: '创建成功！',
@@ -93,9 +95,11 @@ export default {
           mobile: '',
           isadmin: ''
         }
+        this.loading = false
         this.$emit('changeAddVisible', false)
         this.$emit('refresh')
       }).catch(error => {
+        this.loading = false
         this.$message({
           message: error.message || '操作失败！',
           type: 'error'

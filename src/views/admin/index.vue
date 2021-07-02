@@ -63,10 +63,9 @@
         <template slot-scope="{row, $index}">
           <el-button v-if="currUser.isadmin !== '' && currUser.isadmin !== 0 && row.status !== 1" type="text" size="medium" @click="actived(row.id, $index)">激活</el-button>
           <el-button v-if="currUser.isadmin !== '' && currUser.isadmin !== 0 && row.status !== 2" type="text" size="medium" @click="inactived(row.id, $index)">禁用</el-button>
-          <el-button v-if="currUser.id === row.id && parseInt(row.status) === 1" type="text" size="medium" @click="editHandle(row, $index)">编辑</el-button>
-          <el-button v-if="currUser.id === row.id && parseInt(row.status) === 1" type="text" size="medium" @click="updatePwdHandle(row, $index)">修改密码</el-button>
           <el-button v-if="parseInt(currUser.isadmin) > parseInt(row.isadmin) && parseInt(row.status) === 2" type="text" size="medium" @click="resetPwdHandle(row, $index)">重置密码</el-button>
-          <!-- <el-popover
+          <el-popover
+            v-if="currUser.isadmin !== '' && currUser.isadmin !== 0"
             placement="top"
             width="170"
             trigger="hover"
@@ -76,7 +75,7 @@
               <el-button type="danger" size="mini" @click="delUser(row.id, $index)">确定</el-button>
             </div>
             <el-button slot="reference" type="text" size="medium" style="margin-left: 10px;">删除</el-button>
-          </el-popover> -->
+          </el-popover>
         </template>
       </el-table-column>
     </el-table>
@@ -84,8 +83,6 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <Add :dialog-visible-add="dialogVisibleAdd" @changeAddVisible="changeAddVisible" @refresh="getList" />
-    <Edit :edit-item="editItem" :dialog-visible-edit="dialogVisibleEdit" @changeEditVisible="changeEditVisible" @refresh="getList" />
-    <UpdatePwd :dialog-visible-update-pwd="dialogVisibleUpdatePwd" @changeUpdatePwdVisible="changeUpdatePwdVisible" />
     <ResetPwd :edit-item="editItem" :dialog-visible-reset-pwd="dialogVisibleResetPwd" @changeResetPwdVisible="changeResetPwdVisible" />
   </div>
 </template>
@@ -95,13 +92,11 @@ import { fetchList, actived, inactived, deleteUser } from '@/api/admin'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import Add from './add.vue'
-import Edit from './edit.vue'
-import UpdatePwd from './updatePwd.vue'
 import ResetPwd from './resetPwd.vue'
 import { getToken } from '@/utils/auth'
 
 export default {
-  components: { Pagination, Add, Edit, UpdatePwd, ResetPwd },
+  components: { Pagination, Add, ResetPwd },
   directives: { waves },
   filters: {
     isadminFilter(val) {
@@ -126,8 +121,6 @@ export default {
       editItem: {},
       editIndex: '',
       dialogVisibleAdd: false,
-      dialogVisibleEdit: false,
-      dialogVisibleUpdatePwd: false,
       dialogVisibleResetPwd: false
     }
   },
@@ -138,7 +131,18 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(data => {
-        this.list = data.items
+        this.list = data.items.filter(item => {
+          if (this.currUser.isadmin === 0) {
+            // 操作员
+            return this.currUser.id === item.id
+          } else if (this.currUser.isadmin === 1) {
+            // 管理员
+            return item.isadmin === 0 || (item.isadmin === 1 && this.currUser.id === item.id)
+          } else if (this.currUser.isadmin === 2) {
+            // 超级管理员
+            return true
+          }
+        })
         this.total = data.total
 
         this.listLoading = false
@@ -211,20 +215,6 @@ export default {
     },
     changeAddVisible(params) {
       this.dialogVisibleAdd = params
-    },
-    editHandle(item, idx) {
-      this.editItem = item
-      this.editIndex = idx
-      this.dialogVisibleEdit = true
-    },
-    changeEditVisible(params) {
-      this.dialogVisibleEdit = params
-    },
-    updatePwdHandle(item, idx) {
-      this.dialogVisibleUpdatePwd = true
-    },
-    changeUpdatePwdVisible(params) {
-      this.dialogVisibleUpdatePwd = params
     },
     resetPwdHandle(item, idx) {
       this.editItem = item
