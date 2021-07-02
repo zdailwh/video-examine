@@ -8,6 +8,7 @@ const search = require('./remote-search')
 const admin = require('./admin')
 const task = require('./task')
 const group = require('./group')
+const device = require('./device')
 
 const mocks = [
   ...user,
@@ -16,7 +17,8 @@ const mocks = [
   ...search,
   ...admin,
   ...task,
-  ...group
+  ...group,
+  ...device
 ]
 
 // for front mock

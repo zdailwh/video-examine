@@ -186,6 +186,7 @@ import Edit from './edit.vue'
 // const STATUS_DOING = 3 // '处理中'
 // const STATUS_SUCCESS = 4 // '处理成功'
 // const STATUS_FAIL = 5 // '处理失败'
+// const STATUS_DELETE = 6 // '文件已删除'
 
 export default {
   components: { Pagination, Edit },
@@ -198,7 +199,8 @@ export default {
         '文件上传成功': '',
         '处理中': 'warning',
         '处理成功': 'success',
-        '处理失败': 'danger'
+        '处理失败': 'danger',
+        '文件已删除': 'danger'
       }
       return statusMap[status]
     }
@@ -223,7 +225,7 @@ export default {
       editItem: {},
       editIndex: '',
       dialogVisibleEdit: false,
-      statusArr: [{ label: '已创建', value: 0 }, { label: '文件待上传', value: 1 }, { label: '文件上传成功', value: 2 }, { label: '处理中', value: 3 }, { label: '处理成功', value: 4 }, { label: '处理失败', value: 5 }],
+      statusArr: [{ label: '已创建', value: 0 }, { label: '文件待上传', value: 1 }, { label: '文件上传成功', value: 2 }, { label: '处理中', value: 3 }, { label: '处理成功', value: 4 }, { label: '处理失败', value: 5 }, { label: '文件已删除', value: 6 }],
       fileStatusArr: [{ label: '未知', value: 0 }, { label: '正常', value: 1 }, { label: '有故障', value: 2 }],
       selectedItems: []
     }

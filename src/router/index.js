@@ -72,24 +72,12 @@ export const constantRoutes = [
   },
   {
     path: '/',
-    redirect: '/task/index'
-  },
-  {
-    path: '/admin',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/admin/index'),
-        name: 'Finger',
-        meta: { title: '用户管理', icon: 'peoples', affix: true }
-      }
-    ]
+    redirect: '/task/group'
   },
   {
     path: '/task',
     component: Layout,
-    redirect: '/task/index',
+    redirect: '/task/group',
     meta: { title: '任务管理', icon: 'el-icon-s-flag' },
     children: [
       {
@@ -117,6 +105,30 @@ export const constantRoutes = [
         name: 'TaskDetail',
         hidden: true,
         meta: { title: '查看任务' }
+      }
+    ]
+  },
+  {
+    path: '/device',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/device/index'),
+        name: 'Device',
+        meta: { title: '设备配置', icon: 'el-icon-s-tools', affix: true }
+      }
+    ]
+  },
+  {
+    path: '/admin',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/admin/index'),
+        name: 'Finger',
+        meta: { title: '用户管理', icon: 'peoples', affix: true }
       }
     ]
   }
