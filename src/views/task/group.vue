@@ -43,7 +43,7 @@
       <el-form-item>
         <el-button @click="resetForm('filterForm')">重置</el-button>
       </el-form-item>
-      <el-form-item>
+      <el-form-item v-if="!isVisitor">
         <el-button class="filter-item" type="primary" icon="el-icon-document-add"><router-link :to="{name: 'TaskAdd'}">新建任务</router-link></el-button>
       </el-form-item>
     </el-form>
@@ -95,7 +95,7 @@
           <el-tag v-else type="info">{{ row.statusstr }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="210" fixed="right">
+      <el-table-column v-if="!isVisitor" label="操作" align="center" width="210" fixed="right">
         <template slot-scope="{row, $index}">
           <el-button type="text" size="medium"><router-link :to="{name: 'Task', params: {disksn: row.disksn, createdate: row.createdate}}">查看子任务</router-link></el-button>
           <el-button type="text" size="medium" @click="delHandle(row.id, $index)">删除</el-button>
@@ -110,6 +110,7 @@
 </template>
 
 <script>
+import Cookies from 'js-cookie'
 import { fetchList, deleteGroup } from '@/api/group'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -119,6 +120,7 @@ export default {
   directives: { waves },
   data() {
     return {
+      isVisitor: (Cookies.get('Filereview-isVisitor') && JSON.parse(Cookies.get('Filereview-isVisitor'))) || false,
       list: null,
       total: 0,
       listLoading: true,

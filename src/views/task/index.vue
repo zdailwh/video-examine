@@ -48,7 +48,7 @@
       <el-form-item>
         <el-button @click="resetForm('filterForm')">重置</el-button>
       </el-form-item>
-      <el-form-item>
+      <el-form-item v-if="!isVisitor">
         <el-button class="filter-item" type="danger" icon="el-icon-delete" :disabled="!selectedItems.length" @click="handleDelSelected">批量删除</el-button>
       </el-form-item>
     </el-form>
@@ -149,7 +149,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="100" fixed="right">
+      <el-table-column v-if="!isVisitor" label="操作" align="center" width="100" fixed="right">
         <template slot-scope="{row, $index}">
           <el-button type="text" size="medium" @click="editHandle(row, $index)">编辑</el-button>
           <el-popover
@@ -175,6 +175,7 @@
 </template>
 
 <script>
+import Cookies from 'js-cookie'
 import { fetchList, deleteTask } from '@/api/task'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -207,6 +208,7 @@ export default {
   },
   data() {
     return {
+      isVisitor: (Cookies.get('Filereview-isVisitor') && JSON.parse(Cookies.get('Filereview-isVisitor'))) || false,
       list: null,
       total: 0,
       listLoading: true,

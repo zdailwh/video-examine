@@ -47,7 +47,7 @@ const authentication = {
     statusstr: '活跃',
     username: 'system',
     mobile: '13900000000',
-    isadmin: 1,
+    isadmin: 4,
     activity: 0
   }
 }

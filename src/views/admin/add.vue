@@ -17,10 +17,11 @@
           <el-input v-model="formadd.mobile" />
         </el-form-item>
         <el-form-item label="标识" prop="isadmin">
-          <el-select v-model="formadd.isadmin" placeholder="请选择管理员标识">
-            <el-option label="操作员" :value="0" />
-            <el-option label="管理员" :value="1" />
-            <el-option label="超级管理员" :value="2" />
+          <el-select v-model="formadd.isadmin" placeholder="请选择用户标识">
+            <el-option label="普通" :value="2" />
+            <el-option label="操作员" :value="3" />
+            <el-option label="管理员" :value="4" />
+            <el-option label="超级管理员" :value="5" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -90,7 +91,7 @@ export default {
           { type: 'string', message: '手机号格式不正确', length: 11, pattern: /^1[3|5|8|7]([0-9]{9})$/, trigger: 'blur' }
         ],
         isadmin: [
-          { required: true, message: '请选择管理员标识', trigger: 'change' }
+          { required: true, message: '请选择用户标识', trigger: 'change' }
         ]
       }
     }

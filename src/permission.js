@@ -34,7 +34,7 @@ router.beforeEach(async(to, from, next) => {
         try {
           var currUser = JSON.parse(hasToken)
           var roles = []
-          if (parseInt(currUser.isadmin) > 0) {
+          if (parseInt(currUser.isadmin) > 3) {
             roles = ['admin']
           } else {
             roles = ['editor']

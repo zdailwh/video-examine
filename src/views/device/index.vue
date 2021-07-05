@@ -43,10 +43,10 @@
                 <el-slider v-model="formdata.sonic_low" :min="-10" :max="-1" show-input />
               </el-form-item>
               <el-form-item>
-                <el-button class="filter-item" @click="reset">
+                <el-button v-if="!isVisitor" class="filter-item" @click="reset">
                   恢复默认值
                 </el-button>
-                <el-button class="filter-item" type="primary" @click="commit">
+                <el-button v-if="!isVisitor" class="filter-item" type="primary" @click="commit">
                   提交配置
                 </el-button>
               </el-form-item>
@@ -58,10 +58,12 @@
   </div>
 </template>
 <script>
+import Cookies from 'js-cookie'
 import { deviceRead, deviceUpdate, deviceSpace } from '@/api/device'
 export default {
   data() {
     return {
+      isVisitor: (Cookies.get('Filereview-isVisitor') && JSON.parse(Cookies.get('Filereview-isVisitor'))) || false,
       space: {},
       resetdata: {
         thread: 5,
